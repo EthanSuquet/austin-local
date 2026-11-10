@@ -21,11 +21,14 @@
   should own a tab, then rebuild.
 
 ## Rules
-- **Match the PSD** (house rule). PSD pixel positions are commented in `css/site.css`. At 1920 the
-  homepage renders 7,207px tall against the PSD's 7,220.
-- **Font:** the PSDs use **Stevie Sans** (Adobe Fonts). Hanken Grotesk stands in, calibrated to the PSD's
-  line widths (H1 68px, body 16/21 at weight 240). The CSS stack already lists `"stevie-sans"` first;
-  to switch, add the Adobe Fonts kit `<link>` in `build.py` (`FONTS`). The kit's CSS family name is unverified.
+- **Match the PSD** (house rule). PSD pixel positions are commented in `css/site.css`. At 1920 every
+  homepage section sits within ~6px of the PSD; the page is 380px shorter only because the calendar has 4 rows, not 5.
+- **Font: Stevie Sans via Adobe Fonts web project "The Austin Local", ID `rqk0gvx`** (created 2026-11-10 in the
+  Adobe account Chrome is signed in to, Swish's). Five styles: Light 300, Light Italic, Book 400, Regular 500,
+  Medium 600. Set in `build.py` (`ADOBE_KIT`), which adds `.has-stevie` to `<body>`; the overrides are the
+  "Stevie Sans" block in `css/site.css`. At the PSD's own sizes (body 16/21, H1 66px) it matches the PSD's line
+  widths within 1%. Clearing `ADOBE_KIT` falls back to Hanken Grotesk, already calibrated. Don't self-host Stevie:
+  Adobe Fonts covers web projects only.
 - The hero background `img/escuela-hero.jpg` is **rendered from the PSD layers** (photo + its masked
   black fill). Don't re-crop the raw photo; the PSD's uneven darkening won't match with a CSS overlay.
 - Motion: hero zoom-out, 22px fade-ups that replay, accordion width animation. Every class that hides
@@ -34,7 +37,10 @@
 ## Open (2026-11-10)
 - **Moonlight Tower sits in "The Future" tab** as a stand-in. Ethan hasn't picked its tab. "People" is
   empty ("Stories coming soon").
-- About copy and the five calendar events are **lorem ipsum in the PSD**, and on the site.
+- About copy is still **lorem ipsum** (as in the PSD).
+- **Calendar of events (2026-11-10):** the PSD's five lorem rows are replaced by the four dated, upcoming events the
+  articles state (Sweet Home Sunday worship 11/15, Front Market 11/21–22, Zilker tree lighting 11/29). They're in
+  `EVENTS` in `build.py`. They go stale: drop past dates when new articles land.
 - Image rights to confirm before this leaves demo: the Hotel Trinity bar, room and seafood images look
   AI-generated ("Illuminated Octopus Bar Lounge.png" etc.) but show as the real hotel. The Sweet Home tab
   photo is `Sweethome-Missionary-04-Bud-Franck.jpg` (likely Austin Chronicle). The Escuela photos have no credit.

@@ -283,6 +283,15 @@ figcaption { margin-top: 8px; font-size: 12px; line-height: 16px; color: var(--s
 .back { margin-top: 120px !important; }
 .back a { font-weight: var(--reg); text-decoration: none; border-bottom: 1px solid; }
 
+/* ============================================================ Stevie Sans (Adobe Fonts kit rqk0gvx)
+   build.py adds .has-stevie when the kit is on. Kit weights: Light 300, Book 400, Regular 500, Medium 600, Light Italic.
+   At these sizes Stevie matches the PSD's line widths within 1%; the Hanken values above are the fallback's calibration. */
+.has-stevie { --light: 300; --book: 400; --reg: 500; --med: 600; }
+.has-stevie .hero h1, .has-stevie .story-head h1 { font-size: clamp(44px, 3.44cqw, 66px); }
+.has-stevie .feature-lede, .has-stevie .story .lede { letter-spacing: 0; }
+.has-stevie .cat-title { font-size: 24px; }
+.has-stevie .event-date b { font-size: 53px; }
+
 /* ============================================================ motion (classes only take effect with JS) */
 .js .reveal { opacity: 0; transform: translateY(22px); transition: opacity .9s var(--ease), transform .9s var(--ease); }
 .js .reveal.is-in { opacity: 1; transform: none; }

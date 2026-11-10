@@ -49,9 +49,15 @@ ESCUELA_CARD = {
     ],
 }
 
+# Adobe Fonts web project for Stevie Sans (fonts.adobe.com/fonts/stevie-sans; CSS name "stevie-sans").
+# Paste the project ID (the "abc1def" in use.typekit.net/abc1def.css) here and rebuild. Empty = Hanken Grotesk stand-in.
+ADOBE_KIT = "rqk0gvx"  # "The Austin Local" web project, created 2026-11-10 on the Storyhaus Adobe account
+
 FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">'
          '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
          '<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">')
+if ADOBE_KIT:
+    FONTS = f'<link rel="preconnect" href="https://use.typekit.net" crossorigin><link rel="stylesheet" href="https://use.typekit.net/{ADOBE_KIT}.css">'
 
 
 def esc(s):
@@ -60,6 +66,39 @@ def esc(s):
 
 def attr(s):
     return html.escape(s, quote=True)
+
+
+# Calendar of events: only dated, upcoming things the articles themselves state (as of 2026-11-10).
+# (weekday, day, title, location, text, image, alt, link)
+EVENTS = [
+    ("Sun", "15", "Sunday Worship at Sweet Home", "Sweet Home Missionary Baptist Church",
+     "Worship is every Sunday at 11 a.m. at the little white church at 1725 W. 11th St. in Clarksville. "
+     "Bible study is on Wednesdays. It's an active church, so please be respectful of services.",
+     "story-sweet-home.jpg", "Sweet Home Missionary Baptist Church on West 11th Street", "stories/sweet-home/"),
+    ("Sat", "21", "The Front Market, Fall 2026", "Moody Amphitheater, Waterloo Park",
+     "More than 175 independent artists, makers and small business owners from across Texas, 11 a.m. to 5 p.m., "
+     "rain or shine. Free, open-air and dog-friendly, at 1401 Trinity St. Day one of two.",
+     "cat-front-market.jpg", "Shoppers browsing vendor booths at The Front Market", "stories/front-market/"),
+    ("Sun", "22", "The Front Market, Day Two", "Moody Amphitheater, Waterloo Park",
+     "The second day of the market's 20th season, with its own Sunday lineup of vendors and Buenas Lotería at the "
+     "picnic tables. 11 a.m. to 5 p.m., free. Bike parking is at 15th and Red River.",
+     "story-front-market.jpg", "Moody Amphitheater in Waterloo Park", "stories/front-market/"),
+    ("Sun", "29", "Zilker Holiday Tree Lighting", "Zilker Park, 2100 Barton Springs Road",
+     "The Austin Civic Wind Ensemble starts at 5:15 p.m. on the park's south side, and the ceremony begins at 6. "
+     "Free. After opening night the tree stays lit every night through New Year's Day, 6 to 10 p.m.",
+     "story-moonlight-tower.jpg", "Strings of colored lights on the Zilker Holiday Tree", "stories/moonlight-tower/"),
+]
+
+
+def events_html():
+    rows = []
+    for wd, day, title, loc, text, img, alt, link in EVENTS:
+        rows.append(
+            f'    <li class="event reveal"><p class="event-date"><span>{wd}</span><b>{day}</b></p>'
+            f'<img src="img/{img}" alt="{attr(alt)}" loading="lazy" width="1016" height="606">'
+            f'<div class="event-text"><h3>{esc(title)}</h3><p class="label">{esc(loc)}</p><p>{esc(text)}</p></div>'
+            f'<a class="event-link" href="{link}" aria-label="Read the story: {attr(title)}"><img src="img/arrow.svg" alt="" width="40" height="40"></a></li>')
+    return "\n".join(rows)
 
 
 # ---------------------------------------------------------------- parsing
@@ -150,7 +189,7 @@ def about(prefix):
 
 def page(title, desc, prefix, body_class, body):
     return f"""{head(title, desc, prefix)}
-<body class="{body_class}">
+<body class="{body_class}{' has-stevie' if ADOBE_KIT else ''}">
 <div class="page">
 {body}
 {about(prefix)}
@@ -291,7 +330,7 @@ def home(stories):
     tabs = "\n".join(tab_panel(label, cards.get(slug) if slug else None, i, label == DEFAULT_OPEN)
                      for i, (label, slug) in enumerate(CATEGORIES))
     tpl = (ROOT / "templates" / "home.html").read_text()
-    return tpl.replace("{{categories}}", tabs)
+    return tpl.replace("{{categories}}", tabs).replace("{{events}}", events_html())
 
 
 def main():
