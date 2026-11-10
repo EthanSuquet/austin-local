@@ -33,6 +33,8 @@ The park around it does some of the work. Waterloo Park is 11 acres between 12th
 
 A craft market belongs in a park more than a parking lot. This one has the better address.
 
+![A live oak spreading over the lawn at Waterloo Park](front-market-2.jpg "Larry D. Moore / CC BY 4.0")
+
 ## Who's behind it
 
 The market is curated by Future Front, a 501(c)(3) arts nonprofit homegrown in Austin. It describes itself as a cultural space and public exhibition series "with women and LGBTQ+ creatives at the front," and it has been at it since 2016. Home base is a creative space in East Austin. Twice a year it takes the market somewhere bigger. By its own count, the two seasons together welcome more than 400 vendors and more than 10,000 guests.
@@ -72,7 +74,7 @@ The event page calls the food court "immaculate." The listed menus:
 
 Bring a water bottle. There will be fountains on site with free still and sparkling water.
 
-::band
+::band front-market-3.jpg | A curving walkway in Waterloo Park with downtown towers beyond | Larry D. Moore / CC BY 4.0
 
 ## Getting there
 

@@ -12,9 +12,9 @@ Edit content/ and this file. Never edit the generated .html; the next build over
 Story file format: front matter between --- lines, then the body.
     ## Heading           a section
     - item               a list item
-    ![alt](img.jpg)      an image inside the current section
+    ![alt](img.jpg "credit")  an image inside the current section (credit optional)
     ::pair               the next two sections sit side by side
-    ::band [img | alt]   the next section is a full-width sage band (image on the left if given)
+    ::band [img | alt [| credit]]   the next section is a full-width sage band (image on the left if given)
     ::wide img | alt [| credit]   a full-column image between sections
 The first paragraph (or the `dek`, if there is one) is the bold lede.
 """
@@ -130,8 +130,8 @@ def parse(path):
         elif chunk.startswith("::"):
             name, _, arg = chunk[2:].partition(" ")
             blocks.append(("dir", name, [a.strip() for a in arg.split("|")] if arg.strip() else []))
-        elif mi := re.fullmatch(r'!\[(.*?)\]\((\S+?)\)', chunk.strip()):
-            blocks.append(("img", mi.group(2), mi.group(1)))
+        elif mi := re.fullmatch(r'!\[(.*?)\]\((\S+?)(?:\s+"(.*?)")?\)', chunk.strip()):
+            blocks.append(("img", mi.group(2), mi.group(1), mi.group(3) or ""))
         else:
             blocks.append(("p", " ".join(lines)))
     meta["blocks"] = blocks
@@ -220,7 +220,8 @@ def render_blocks(blocks, prefix):
         elif b[0] == "ul":
             out.append("<ul>" + "".join(f"<li>{esc(i)}</li>" for i in b[1]) + "</ul>")
         elif b[0] == "img":
-            out.append(f'<figure class="inline-fig reveal"><img src="{prefix}img/{b[1]}" alt="{attr(b[2])}" loading="lazy"></figure>')
+            cap = f"<figcaption>Photo: {esc(b[3])}</figcaption>" if b[3] else ""
+            out.append(f'<figure class="inline-fig reveal"><img src="{prefix}img/{b[1]}" alt="{attr(b[2])}" loading="lazy">{cap}</figure>')
     return "\n".join(out)
 
 
@@ -277,7 +278,8 @@ def story_body(s, prefix):
         if d and d[1] == "band":
             args = d[2]
             if args:
-                img = (f'<div class="band-img"><img src="{prefix}img/{args[0]}" alt="{attr(args[1] if len(args) > 1 else "")}" loading="lazy"></div>')
+                cap = f"<figcaption>Photo: {esc(args[2])}</figcaption>" if len(args) > 2 and args[2] else ""
+                img = (f'<figure class="band-img"><img src="{prefix}img/{args[0]}" alt="{attr(args[1] if len(args) > 1 else "")}" loading="lazy">{cap}</figure>')
                 parts.append(f'<div class="band band--img">{img}<div class="band-text">'
                              + section_html(sec["title"], sec["blocks"], prefix) + "</div></div>")
             else:

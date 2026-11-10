@@ -261,7 +261,7 @@ figcaption { margin-top: 8px; font-size: 12px; line-height: 16px; color: var(--s
 .sec ul + p { margin-top: 21px; }
 .sec li + li { margin-top: 4px; }
 .inline-fig { margin-top: 69px; }
-.inline-fig img { width: 100%; aspect-ratio: 524 / 389; object-fit: cover; }
+.inline-fig img { width: 100%; height: auto; }   /* natural ratio: the PSD's seafood shot is pre-cropped to 524 × 389 */
 
 .pair { display: grid; grid-template-columns: 531fr 72fr 522fr; align-items: start; }
 .pair > :first-child { grid-column: 1; }
@@ -275,7 +275,8 @@ figcaption { margin-top: 8px; font-size: 12px; line-height: 16px; color: var(--s
 .band { margin-top: 178px; background: var(--sage); }
 .band + .col, .band + .pair { margin-top: 155px !important; }
 .band--img { display: grid; grid-template-columns: 46.93% 5.2% 1fr; min-height: clamp(420px, 31.3cqw, 600px); }
-.band--img .band-img { grid-column: 1; }
+.band--img .band-img { grid-column: 1; position: relative; }
+.band-img figcaption { position: absolute; right: 12px; bottom: 10px; margin: 0; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.7); }
 .band--img .band-img img { width: 100%; height: 100%; object-fit: cover; }
 .band--img .band-text { grid-column: 3; align-self: center; max-width: 573px; padding: 48px 0; margin-right: 24px; }
 .band--text { padding: 96px 0; }
@@ -374,6 +375,7 @@ figcaption { margin-top: 8px; font-size: 12px; line-height: 16px; color: var(--s
   .pair > :last-child { margin-top: 56px; }
   .band--img { display: block; }
   .band--img .band-img img { aspect-ratio: 3 / 2; height: auto; }
+  .band-img figcaption { right: 24px; }
   .band--img .band-text { max-width: none; padding: 40px 24px 48px; }
   .band--text { padding: 48px 0; }
   .band--text .sec { margin-left: 0; max-width: none; }

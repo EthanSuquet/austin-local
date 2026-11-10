@@ -22,6 +22,8 @@ This is Sweet Home Missionary Baptist Church, 1725 W. 11th St., in Clarksville. 
 
 "Sweet Home is the foundation, the hub," Ada Bolden told the Chronicle. "If we don't do anything else, we're gonna come home. We're gonna come to Sweet Home."
 
+::band sweet-home-2.jpg | A historic wood-frame house in Clarksville | Larry D. Moore / CC BY 4.0
+
 ## A neighborhood freedmen built
 
 Clarksville began in 1871. That year Charles Clark, a freedman, bought two acres of land on what is now Tenth Street and divided it among other freedmen so they could build a community of their own outside Austin. Bolden told the Chronicle her family was the second family of freed slaves to settle there, in the 1870s.
@@ -50,6 +52,8 @@ The next fight went differently. In 1976, residents and their supporters defeate
 
 One loss. One win. Both planned in the same rooms.
 
+![A historic wood-frame house in Clarksville with blue doors](sweet-home-3.jpg "Larry D. Moore / CC BY 4.0")
+
 ## Faces in the basement
 
 Pictures of the church's prominent members line the basement walls, the Chronicle reports. Elias Mayes, one of the few Black legislators in Texas during Reconstruction, attended Sweet Home. "Uncle" Seymour Washington, whom the Chronicle calls the unlikely patriarch of Austin's country hippie scene in the Seventies, sang in the choir. Baseball all-star Don Baylor and his wife, Becky, led restoration efforts before he died in 2017.
@@ -67,6 +71,8 @@ At the 155th Homecoming on July 19, the Chronicle reports, Manning preached on M
 After the services, people in matching blue aprons served soul food in the basement. Old neighbors caught up. A few children rode bikes outside.
 
 "Come on Sweet Home," McCormick urged as he built his sermon to its peak, the Chronicle reported. "Don't quit now."
+
+::wide sweet-home-4.jpg | A weathered wood cabin with a hammock in the yard | Carol M. Highsmith / public domain
 
 ::band
 

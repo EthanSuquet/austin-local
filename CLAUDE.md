@@ -8,7 +8,9 @@
 - Repo: `EthanSuquet/austin-local` (**public**, so Pages works on the free plan; Ethan OK'd it 2026-11-10).
   Pages serves branch **`demo`**. `noindex` is on every page while it's a demo.
 - The first four articles came as Word files ("Grok Articles Round 1 (Rewrite)", updated 2026-11-10 with a
-  byline, a photo credit and one CC-licensed photo each). Their text is in `content/*.md`, verbatim.
+  byline, a photo credit and one CC-licensed photo each; Moonlight Tower, Sweet Home and Front Market came again
+  later that day with 2–3 more credited photos each). Their text is in `content/*.md`, verbatim. Each photo sits in
+  the layout slot nearest its spot in the Word file, with its credit as a caption.
 
 ## How it's built
 - **Edit `content/`, `templates/home.html`, `build.py` or `css/`; never the generated `index.html` or

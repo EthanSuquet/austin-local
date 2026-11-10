@@ -7,7 +7,7 @@ card_title: An 1890s Streetlight Puts On a Tree
 byline: Micah Solano
 photo: story-moonlight-tower.jpg
 photo_credit: That Other Paper / CC BY-SA 2.0
-card_image: story-moonlight-tower.jpg
+card_image: moonlight-tower-2.jpg
 card_lead_italic: true
 hero_alt: Strings of colored lights spiraling up the Zilker Holiday Tree, a moonlight tower in Zilker Park
 source: TODO-7-moonlight-tower-article.docx
@@ -28,6 +28,8 @@ Nineteen utility poles, each fourteen feet tall, ring the base of the tower. Fro
 City of Austin electricians designed the spiral. At the peak sits a double star, ten feet from point to point, lit with one hundred fifty frosted bulbs. The whole figure stands 155 feet tall, measures 380 feet around and 120 feet across.
 
 No tree was cut. Nothing was hauled in. The city just dressed something it already had.
+
+![A moonlight tower in Zilker Park against a summer sky](moonlight-tower-2.jpg "Matthew Bellemare / CC BY-SA 3.0")
 
 ## What you're standing under
 
@@ -59,7 +61,7 @@ Then it came back. It has kept coming back. This is the tree's 60th holiday seas
 
 No private spectacle company runs this. The tree is installed, produced and managed by City of Austin departments: Austin Energy, Austin Parks and Recreation, Austin Resource Recovery and the Austin Police Department. That's why it's free, and why it's open to anyone who shows up.
 
-::band
+::band moonlight-tower-3.jpg | Zilker Park's lawn with the downtown skyline beyond it | Spawnzilla / CC BY-SA 4.0
 
 ## The evening itself
 
@@ -68,6 +70,8 @@ Come early. The Austin Civic Wind Ensemble starts at 5:15 p.m. on the south side
 After opening night, the tree stays lit November 29 through January 1, from 6 p.m. until the 10 p.m. park curfew.
 
 Parking for the lighting is free, first-come, first-served, on the paved lots. The City suggests coming in on eastbound Barton Springs Road, or taking CapMetro. The Parks page advises layered clothing and footwear made for the outdoors. Late November nights in the park can get cold.
+
+::wide moonlight-tower-4.jpg | The stone Zilker Park entrance sign under the trees | Larry D. Moore / CC BY 4.0
 
 ## How to take it in
 
