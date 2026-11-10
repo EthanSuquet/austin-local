@@ -187,6 +187,8 @@ button { font: inherit; color: inherit; }
   align-items: start;
 }
 .event + .event { margin-top: 77px; }
+.events-empty { display: none; margin-top: 64px; font-weight: var(--reg); font-size: 24px; line-height: 29px; }
+.events-empty.is-shown { display: block; }
 .event-date { grid-column: 1; text-align: center; padding-top: 2px; }
 .event-date span { display: block; font-size: 20px; line-height: 20px; text-transform: uppercase; }
 .event-date b { display: block; margin-top: 15px; font-weight: var(--med); font-size: 54px; line-height: 44px; }

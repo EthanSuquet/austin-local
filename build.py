@@ -20,7 +20,9 @@ The first paragraph (or the `dek`, if there is one) is the bold lede.
 """
 import html
 import re
+from datetime import date, datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parent
 CONTENT = ROOT / "content"
@@ -79,37 +81,46 @@ def attr(s):
     return html.escape(s, quote=True)
 
 
-# Calendar of events: only dated, upcoming things the articles themselves state (as of 2026-11-10).
-# (weekday, day, title, location, text, image, alt, link)
+# Calendar of events: dated, upcoming things the articles themselves state.
+# Each event drops off the calendar once its date has passed in Austin (America/Chicago) time, twice over:
+#   - here, at build time (a past event isn't written into index.html at all), and
+#   - in js/site.js, in the visitor's browser, from each row's data-date, so it disappears the next morning
+#     even if nobody rebuilds. If no events are left, "More events coming soon." shows instead.
+# (date, title, location, text, image, alt, link). The weekday and day number come from the date.
 EVENTS = [
-    ("Sun", "15", "Sunday Worship at Sweet Home", "Sweet Home Missionary Baptist Church",
-     "Worship is every Sunday at 11 a.m. at the little white church at 1725 W. 11th St. in Clarksville. "
-     "Bible study is on Wednesdays. It's an active church, so please be respectful of services.",
-     "story-sweet-home.jpg", "Sweet Home Missionary Baptist Church on West 11th Street", "stories/sweet-home/"),
-    ("Sat", "21", "The Front Market, Fall 2026", "Moody Amphitheater, Waterloo Park",
+    ("2026-11-21", "The Front Market, Fall 2026", "Moody Amphitheater, Waterloo Park",
      "More than 175 independent artists, makers and small business owners from across Texas, 11 a.m. to 5 p.m., "
      "rain or shine. Free, open-air and dog-friendly, at 1401 Trinity St. Day one of two.",
      "cat-front-market.jpg", "Shoppers browsing vendor booths at The Front Market", "stories/front-market/"),
-    ("Sun", "22", "The Front Market, Day Two", "Moody Amphitheater, Waterloo Park",
+    ("2026-11-22", "The Front Market, Day Two", "Moody Amphitheater, Waterloo Park",
      "The second day of the market's 20th season, with its own Sunday lineup of vendors and Buenas Lotería at the "
      "picnic tables. 11 a.m. to 5 p.m., free. Bike parking is at 15th and Red River.",
      "story-front-market.jpg", "Moody Amphitheater in Waterloo Park", "stories/front-market/"),
-    ("Sun", "29", "Zilker Holiday Tree Lighting", "Zilker Park, 2100 Barton Springs Road",
+    ("2026-11-29", "Zilker Holiday Tree Lighting", "Zilker Park, 2100 Barton Springs Road",
      "The Austin Civic Wind Ensemble starts at 5:15 p.m. on the park's south side, and the ceremony begins at 6. "
      "Free. After opening night the tree stays lit every night through New Year's Day, 6 to 10 p.m.",
      "story-moonlight-tower.jpg", "Strings of colored lights on the Zilker Holiday Tree", "stories/moonlight-tower/"),
 ]
 
 
+def austin_today():
+    return datetime.now(ZoneInfo("America/Chicago")).date()
+
+
 def events_html():
+    today = austin_today()
     rows = []
-    for wd, day, title, loc, text, img, alt, link in EVENTS:
+    for iso, title, loc, text, img, alt, link in sorted(EVENTS):
+        d = date.fromisoformat(iso)
+        if d < today:
+            continue
         rows.append(
-            f'    <li class="event reveal"><p class="event-date"><span>{wd}</span><b>{day}</b></p>'
+            f'    <li class="event reveal" data-date="{iso}"><p class="event-date"><span>{d:%a}</span><b>{d.day}</b></p>'
             f'<img src="img/{img}" alt="{attr(alt)}" loading="lazy" width="1016" height="606">'
             f'<div class="event-text"><h3>{esc(title)}</h3><p class="label">{esc(loc)}</p><p>{esc(text)}</p></div>'
             f'<a class="event-link" href="{link}" aria-label="Read the story: {attr(title)}"><img src="img/arrow.svg" alt="" width="40" height="40"></a></li>')
-    return "\n".join(rows)
+    empty = "" if rows else " is-shown"
+    return "\n".join(rows), empty
 
 
 # ---------------------------------------------------------------- parsing
@@ -351,7 +362,8 @@ def home(stories):
     tabs = "\n".join(tab_panel(label, cards.get(slug) if slug else None, i, label == DEFAULT_OPEN)
                      for i, (label, slug) in enumerate(CATEGORIES))
     tpl = (ROOT / "templates" / "home.html").read_text()
-    return tpl.replace("{{categories}}", tabs).replace("{{events}}", events_html())
+    rows, empty = events_html()
+    return tpl.replace("{{categories}}", tabs).replace("{{events}}", rows).replace("{{events_empty}}", empty)
 
 
 def main():

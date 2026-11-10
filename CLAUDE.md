@@ -43,9 +43,11 @@
 ## Open (2026-11-10)
 - **Culture + Community** (= the sheet's Health & Wellness) has no story yet ("Stories coming soon"); the 11/2 sheet confirmed none.
 - **About copy** is Ethan's (2026-11-10), in `about()` in `build.py`.
-- **Calendar of events (2026-11-10):** the PSD's five lorem rows are replaced by the four dated, upcoming events the
-  articles state (Sweet Home Sunday worship 11/15, Front Market 11/21–22, Zilker tree lighting 11/29). They're in
-  `EVENTS` in `build.py`. They go stale: drop past dates when new articles land.
+- **Calendar of events:** dated, upcoming events from the articles, in `EVENTS` in `build.py` (date first; the weekday
+  is derived). **Past events drop off automatically** (Ethan, 2026-11-10): the build skips any event dated before
+  today in Austin time, and `js/site.js` removes them in the browser the morning after, so the live page stays
+  right without a rebuild. With none left it shows "More events coming soon." Test with `?today=YYYY-MM-DD`.
+  Sweet Home's Sunday worship was taken off (it'd be past by launch).
 - Image rights to confirm before this leaves demo: the Hotel Trinity bar, room and seafood images look
   AI-generated ("Illuminated Octopus Bar Lounge.png" etc.) but show as the real hotel. The Sweet Home tab
   photo is `Sweethome-Missionary-04-Bud-Franck.jpg` (likely Austin Chronicle). The Escuela photos have no credit.

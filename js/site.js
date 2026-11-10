@@ -10,6 +10,24 @@
     if (img.complete) go(); else { img.addEventListener('load', go); img.addEventListener('error', go); }
   }
 
+  // calendar: drop events whose date has passed in Austin time (the build drops them too, but the page
+  // may be days old). ?today=YYYY-MM-DD overrides the date, for testing.
+  var list = document.querySelector('.event-list');
+  if (list) {
+    var today = new URLSearchParams(location.search).get('today');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(today || '')) {
+      try { today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago' }).format(new Date()); }
+      catch (e) { today = new Date().toISOString().slice(0, 10); }
+    }
+    list.querySelectorAll('.event[data-date]').forEach(function (ev) {
+      if (ev.getAttribute('data-date') < today) ev.remove();
+    });
+    if (!list.querySelector('.event')) {
+      var empty = document.querySelector('.events-empty');
+      if (empty) empty.classList.add('is-shown');
+    }
+  }
+
   // reveals replay as they re-enter, like the Storyhaus sites
   var items = document.querySelectorAll('.reveal');
   if (reduce || !('IntersectionObserver' in window)) {
