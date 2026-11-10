@@ -15,7 +15,12 @@
   `stories/*/index.html`.** Run `python3 build.py` after any change.
 - One `.md` per story. Its front matter sets the homepage tab (`category`), kicker, card title and images.
   The body format (`##` sections, `::pair`, `::band`, `::wide`) is documented at the top of `build.py`.
-- Homepage tab order and which story each tab shows: `CATEGORIES` in `build.py`. The Escuela feature
+- **Categories come from the weekly Austin Blog sheet** (`~/Downloads/Austin-Blog-Weekly-Sheet-2026-11-02 (2).docx`, v5),
+  not the PSD (Ethan, 2026-11-10: "all of them should match whatever category they're under" on the sheet). The six
+  tabs, in sheet order: Eat + Drink · Weird · Real Estate/Business · People · Health & Wellness · Things to Do. The
+  article file prefixes encode them: WRD = Weird, BIZ = Real Estate/Business, PPL = People, TODO = Things to Do.
+  The PSD's tab names (What's Happening, Culture + Community, The Future, The Austin Vibe) are placeholders; don't restore them.
+- Homepage tab order and which story each tab shows: `CATEGORIES` in `build.py`; a story's own label is `category:` in its `.md`. The Escuela feature
   ("Room to Grow") lives in `templates/home.html`, because the PSD lays it out by hand.
 - New article: add `content/<slug>.md`, put its photo in `img/`, add the slug to `CATEGORIES` if it
   should own a tab, then rebuild.
@@ -35,8 +40,7 @@
   content is added by JS; reduced motion gets a plain page.
 
 ## Open (2026-11-10)
-- **Moonlight Tower sits in "The Future" tab** as a stand-in. Ethan hasn't picked its tab. "People" is
-  empty ("Stories coming soon").
+- **Health & Wellness** has no story yet ("Stories coming soon"); the 11/2 sheet confirmed none.
 - About copy is still **lorem ipsum** (as in the PSD).
 - **Calendar of events (2026-11-10):** the PSD's five lorem rows are replaced by the four dated, upcoming events the
   articles state (Sweet Home Sunday worship 11/15, Front Market 11/21–22, Zilker tree lighting 11/29). They're in

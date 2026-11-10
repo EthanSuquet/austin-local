@@ -1,6 +1,6 @@
 ---
 slug: hotel-trinity
-category: The Austin Vibe
+category: Real Estate/Business
 kicker: Downtown Austin
 title: Hotel Trinity didn't have to invent a sense of place. It moved in next to one.
 card_title: Hotel Trinity Didn't Have to Invent a Sense of Place. It Moved in Next to One.

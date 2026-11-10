@@ -1,6 +1,6 @@
 ---
 slug: sweet-home
-category: Culture + Community
+category: People
 kicker: Clarksville
 title: None of Sweet Home's regulars live in Clarksville anymore. They come back anyway.
 card_title: None of Sweet Home's Regulars Live in Clarksville Anymore. They Come Back Anyway.

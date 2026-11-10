@@ -25,16 +25,18 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 CONTENT = ROOT / "content"
 
-# Homepage accordion, in PSD order. Each tab shows one story; None = no story yet.
+# Homepage accordion. Tabs are the categories of the weekly Austin Blog sheet
+# (Austin-Blog-Weekly-Sheet-2026-11-02, v5), in its order; they replace the PSD's placeholder names.
+# Each tab shows one story; None = nothing published there yet.
 CATEGORIES = [
-    ("What's Happening", "front-market"),
     ("Eat + Drink", "escuela"),          # the homepage feature, defined below
-    ("Culture + Community", "sweet-home"),
-    ("The Future", "moonlight-tower"),
-    ("People", None),
-    ("The Austin Vibe", "hotel-trinity"),
+    ("Weird", "front-market"),
+    ("Real Estate/Business", "hotel-trinity"),
+    ("People", "sweet-home"),
+    ("Health & Wellness", None),
+    ("Things to Do", "moonlight-tower"),
 ]
-DEFAULT_OPEN = "What's Happening"  # the open tab in the PSD
+DEFAULT_OPEN = "Weird"  # the PSD opens on the Front Market story
 
 ESCUELA_CARD = {
     "slug": "escuela",
@@ -306,7 +308,7 @@ def tab_panel(label, card, idx, open_):
     tab = (f'<button class="cat-tab" id="{pid}-tab" aria-expanded="{is_open}" aria-controls="{pid}">'
            f'<span>{esc(label)}</span></button>')
     if card is None:
-        body = '<div class="cat-empty"><p class="label">People</p><p class="cat-title">Stories coming soon.</p></div>'
+        body = f'<div class="cat-empty"><p class="label">{esc(label)}</p><p class="cat-title">Stories coming soon.</p></div>'
     else:
         ex = "".join(f"<p><em>{esc(t)}</em></p>" if k == "em" else f"<p>{esc(t)}</p>" for k, t in card["excerpt"])
         body = (f'<div class="cat-img"><img src="img/{card["card_image"]}" alt="{attr(card.get("card_alt", ""))}" loading="lazy"></div>'
