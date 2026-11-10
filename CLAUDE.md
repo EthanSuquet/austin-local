@@ -42,7 +42,7 @@
 
 ## Open (2026-11-10)
 - **Culture + Community** (= the sheet's Health & Wellness) has no story yet ("Stories coming soon"); the 11/2 sheet confirmed none.
-- About copy is still **lorem ipsum** (as in the PSD).
+- **About copy** is Ethan's (2026-11-10), in `about()` in `build.py`.
 - **Calendar of events (2026-11-10):** the PSD's five lorem rows are replaced by the four dated, upcoming events the
   articles state (Sweet Home Sunday worship 11/15, Front Market 11/21–22, Zilker tree lighting 11/29). They're in
   `EVENTS` in `build.py`. They go stale: drop past dates when new articles land.

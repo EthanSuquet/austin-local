@@ -359,6 +359,7 @@ figcaption { margin-top: 8px; font-size: 12px; line-height: 16px; color: var(--s
 
   .about { margin-top: 120px; }
   .about > .label { margin-left: 37px; }
+  .about > .label::before { height: 150px; }
   .about-band { grid-template-columns: 24px 1fr 24px; padding-top: 72px; }
   .about-logo { grid-column: 2; width: 220px; }
   .about-text { grid-column: 2; margin-top: 32px; }
