@@ -1,6 +1,6 @@
 ---
 slug: moonlight-tower
-category: Things to Do
+category: The Future
 kicker: Zilker Park
 title: An 1890s streetlight puts on a tree
 card_title: An 1890s Streetlight Puts On a Tree

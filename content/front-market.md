@@ -1,6 +1,6 @@
 ---
 slug: front-market
-category: Weird
+category: What's Happening
 kicker: The Front Market
 title: The person who made it is the person taking your card
 card_title: The Person Who Made It Is the Person Taking Your Card

@@ -25,18 +25,27 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 CONTENT = ROOT / "content"
 
-# Homepage accordion. Tabs are the categories of the weekly Austin Blog sheet
-# (Austin-Blog-Weekly-Sheet-2026-11-02, v5), in its order; they replace the PSD's placeholder names.
-# Each tab shows one story; None = nothing published there yet.
+# Homepage accordion: the PSD's tab names, in PSD order. Each tab shows one story; None = nothing there yet.
+# The weekly Austin Blog sheet (Austin-Blog-Weekly-Sheet-2026-11-02, v5) uses its own category names; they map
+# one-to-one onto these tabs (Ethan, 2026-11-10, keeping the stories where the PSD placed them). Article file
+# prefixes follow the sheet: WRD = Weird, BIZ = Real Estate/Business, PPL = People, TODO = Things to Do.
+SHEET_TO_TAB = {
+    "Weird": "What's Happening",
+    "Eat + Drink": "Eat + Drink",
+    "Health & Wellness": "Culture + Community",
+    "Things to Do": "The Future",
+    "People": "People",
+    "Real Estate/Business": "The Austin Vibe",
+}
 CATEGORIES = [
+    ("What's Happening", "front-market"),
     ("Eat + Drink", "escuela"),          # the homepage feature, defined below
-    ("Weird", "front-market"),
-    ("Real Estate/Business", "hotel-trinity"),
+    ("Culture + Community", None),
+    ("The Future", "moonlight-tower"),
     ("People", "sweet-home"),
-    ("Health & Wellness", None),
-    ("Things to Do", "moonlight-tower"),
+    ("The Austin Vibe", "hotel-trinity"),
 ]
-DEFAULT_OPEN = "Weird"  # the PSD opens on the Front Market story
+DEFAULT_OPEN = "What's Happening"  # the open tab in the PSD
 
 ESCUELA_CARD = {
     "slug": "escuela",
