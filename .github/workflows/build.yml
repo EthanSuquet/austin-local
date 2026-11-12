@@ -1,0 +1,55 @@
+# Build and publish The Austin Local.
+# Every push validates the content (python3 build.py --check) and builds the site. On `demo` (and on the daily
+# run, which drops past events from the calendar) the result is deployed to GitHub Pages as an artifact:
+# Pages is set to "GitHub Actions" as its source, so nothing is committed back and nothing can loop.
+name: Build and deploy
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  schedule:
+    - cron: "0 11 * * *"   # 11:00 UTC = 5 AM Austin (CST) / 6 AM (CDT)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate stories
+        run: python3 build.py --check
+      - name: Build
+        run: python3 build.py
+      - name: Collect the public site
+        run: |
+          mkdir _site
+          cp -r index.html stories css js img .nojekyll _site/
+      - if: github.ref == 'refs/heads/demo' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    if: github.ref == 'refs/heads/demo' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
