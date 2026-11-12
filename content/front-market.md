@@ -11,6 +11,8 @@ card_image: cat-front-market.jpg
 card_lead_italic: false
 hero_alt: Moody Amphitheater in Waterloo Park, with the Texas Capitol dome behind it
 source: WRD-4-175-makers-article.docx
+event: 2026-11-21 | The Front Market, Fall 2026 | Moody Amphitheater, Waterloo Park | More than 175 independent artists, makers and small business owners from across Texas, 11 a.m. to 5 p.m., rain or shine. Free, open-air and dog-friendly, at 1401 Trinity St. Day one of two. | cat-front-market.jpg | Shoppers browsing vendor booths at The Front Market
+event: 2026-11-22 | The Front Market, Day Two | Moody Amphitheater, Waterloo Park | The second day of the market's 20th season, with its own Sunday lineup of vendors and Buenas Lotería at the picnic tables. 11 a.m. to 5 p.m., free. Bike parking is at 15th and Red River. | story-front-market.jpg | Moody Amphitheater in Waterloo Park
 ---
 
 Most of what you buy, nobody made. Not anyone you could name, anyway. It came off a line, out of a warehouse, onto a porch.

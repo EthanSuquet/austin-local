@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Build The Austin Local demo site.
 
-    python3 build.py
+    python3 build.py           validate, then build (stops with errors if a story is invalid)
+    python3 build.py --check   validate only (front matter, images, slugs, events); exit 1 on any error
 
-Reads content/*.md (one file per story) and writes:
+Reads content/*.md (one file per story) plus content/events.txt (standalone events) and writes:
     index.html                     the landing page (YMAU_AustinBlog_LP-00.psd)
     stories/<slug>/index.html      one page per story (YMAU_AustinBlog_InteriorStory-01.psd)
 
@@ -17,9 +18,29 @@ Story file format: front matter between --- lines, then the body.
     ::band [img | alt [| credit]]   the next section is a full-width sage band (image on the left if given)
     ::wide img | alt [| credit]   a full-column image between sections
 The first paragraph (or the `dek`, if there is one) is the bold lede.
+
+Front matter (one `key: value` per line):
+    slug          required; lowercase letters, digits, hyphens; must match the file name (content/<slug>.md)
+    category      required; a homepage tab name (CATEGORIES) or a weekly-sheet name (SHEET_TO_TAB keys)
+    kicker, title, card_title, byline, card_image, hero_alt   required
+    photo         required unless `hero` is set: the story's lead photo; `photo_credit` is its caption
+    hero          optional: a lead image with no credit (overrides photo as the page's hero)
+    dek           optional: the lede, instead of the first paragraph
+    card_lead_italic   optional, true/false (default true): the card's first paragraph in italics
+    date          optional, YYYY-MM-DD publish date (stories without one count as 2026-11-10)
+    feature       optional: true = pin this story to its tab; false = never take the tab (archive only)
+    source        optional: the Word file it came from
+    event         optional, repeatable; one calendar event per line:
+                  event: YYYY-MM-DD | title | location | text | image | alt [| link]
+                  (link defaults to this story's page)
+
+Homepage tabs: each tab shows its pinned story (feature: true), else the newest story (by `date`, then file
+name) in that category. Stories bumped off a tab stay built and are listed under "More stories".
 """
 import html
 import re
+import shutil
+import sys
 from datetime import date, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -39,15 +60,14 @@ SHEET_TO_TAB = {
     "People": "People",
     "Real Estate/Business": "The Austin Vibe",
 }
-CATEGORIES = [
-    ("What's Happening", "front-market"),
-    ("Eat + Drink", "escuela"),          # the homepage feature, defined below
-    ("Culture + Community", None),
-    ("The Future", "moonlight-tower"),
-    ("People", "sweet-home"),
-    ("The Austin Vibe", "hotel-trinity"),
-]
+# Tab order is fixed (the PSD's). Which story a tab shows comes from the stories' own front matter (see the top
+# of this file): pinned (`feature: true`), else the newest in that category. A new story claims its tab with no
+# code edit here.
+CATEGORIES = ["What's Happening", "Eat + Drink", "Culture + Community", "The Future", "People", "The Austin Vibe"]
 DEFAULT_OPEN = "What's Happening"  # the open tab in the PSD
+# The Escuela feature is laid out by hand in templates/home.html; its card holds the Eat + Drink tab until an
+# Eat + Drink story is pinned or dated after it.
+HOUSE_CARDS = {"Eat + Drink": "escuela"}
 
 ESCUELA_CARD = {
     "slug": "escuela",
@@ -56,6 +76,7 @@ ESCUELA_CARD = {
     "card_image": "escuela-sign.jpg",
     "card_alt": "The Escuela Oak Hill mosaic sign",
     "href": "#story",
+    "date": "2026-11-10",
     "excerpt": [
         ("em", "A 1923 Oak Hill schoolhouse gets a second life as a farm-to-table Tex-Mex restaurant. We went to see if it makes the grade."),
         ("p", "If you've headed out toward Dripping Springs, you've likely passed a low, nondescript limestone building tucked behind a stand of heritage oaks, right where the 290 and 71 split. For half a century it was the site of Oak Hill Elementary. Since September it's been Escuela, Oak Hill's buzzed-about farm-to-table Tex-Mex arrival, and another reminder that some of this city’s best new places stem from our deepest roots."),
@@ -81,36 +102,50 @@ def attr(s):
     return html.escape(s, quote=True)
 
 
-# Calendar of events: dated, upcoming things the articles themselves state.
+# Calendar of events: dated, upcoming things the articles themselves state. They live with their story, as
+# `event:` lines in its front matter, or (for events with no story) in content/events.txt, one per line:
+#     YYYY-MM-DD | title | location | text | image | alt [| link]
 # Each event drops off the calendar once its date has passed in Austin (America/Chicago) time, twice over:
 #   - here, at build time (a past event isn't written into index.html at all), and
 #   - in js/site.js, in the visitor's browser, from each row's data-date, so it disappears the next morning
 #     even if nobody rebuilds. If no events are left, "More events coming soon." shows instead.
-# (date, title, location, text, image, alt, link). The weekday and day number come from the date.
-EVENTS = [
-    ("2026-11-21", "The Front Market, Fall 2026", "Moody Amphitheater, Waterloo Park",
-     "More than 175 independent artists, makers and small business owners from across Texas, 11 a.m. to 5 p.m., "
-     "rain or shine. Free, open-air and dog-friendly, at 1401 Trinity St. Day one of two.",
-     "cat-front-market.jpg", "Shoppers browsing vendor booths at The Front Market", "stories/front-market/"),
-    ("2026-11-22", "The Front Market, Day Two", "Moody Amphitheater, Waterloo Park",
-     "The second day of the market's 20th season, with its own Sunday lineup of vendors and Buenas Lotería at the "
-     "picnic tables. 11 a.m. to 5 p.m., free. Bike parking is at 15th and Red River.",
-     "story-front-market.jpg", "Moody Amphitheater in Waterloo Park", "stories/front-market/"),
-    ("2026-11-29", "Zilker Holiday Tree Lighting", "Zilker Park, 2100 Barton Springs Road",
-     "The Austin Civic Wind Ensemble starts at 5:15 p.m. on the park's south side, and the ceremony begins at 6. "
-     "Free. After opening night the tree stays lit every night through New Year's Day, 6 to 10 p.m.",
-     "story-moonlight-tower.jpg", "Strings of colored lights on the Zilker Holiday Tree", "stories/moonlight-tower/"),
-]
+# The weekday and day number come from the date.
+EVENTS_FILE = CONTENT / "events.txt"
+DEFAULT_DATE = "2026-11-10"  # stories (and the Escuela feature) without a `date:` count as this old
+
+
+def parse_event(line, default_link=""):
+    """'date | title | location | text | image | alt [| link]' -> tuple, or raise ValueError."""
+    f = [x.strip() for x in line.split("|")]
+    if len(f) not in (6, 7):
+        raise ValueError(f"needs 6 or 7 |-separated fields (date | title | location | text | image | alt [| link]), got {len(f)}")
+    date.fromisoformat(f[0])
+    if not all(f[:6]):
+        raise ValueError("date, title, location, text, image and alt can't be empty")
+    link = f[6] if len(f) == 7 and f[6] else default_link
+    return (f[0], f[1], f[2], f[3], f[4], f[5], link)
+
+
+def load_events(stories):
+    events = []
+    for s in stories:
+        for line in s.get("events", []):
+            events.append(parse_event(line, f"stories/{s['slug']}/"))
+    if EVENTS_FILE.exists():
+        for line in EVENTS_FILE.read_text().splitlines():
+            if line.strip() and not line.lstrip().startswith("#"):
+                events.append(parse_event(line))
+    return events
 
 
 def austin_today():
     return datetime.now(ZoneInfo("America/Chicago")).date()
 
 
-def events_html():
+def events_html(events):
     today = austin_today()
     rows = []
-    for iso, title, loc, text, img, alt, link in sorted(EVENTS):
+    for iso, title, loc, text, img, alt, link in sorted(events):
         d = date.fromisoformat(iso)
         if d < today:
             continue
@@ -118,7 +153,8 @@ def events_html():
             f'    <li class="event reveal" data-date="{iso}"><p class="event-date"><span>{d:%a}</span><b>{d.day}</b></p>'
             f'<img src="img/{img}" alt="{attr(alt)}" loading="lazy" width="1016" height="606">'
             f'<div class="event-text"><h3>{esc(title)}</h3><p class="label">{esc(loc)}</p><p>{esc(text)}</p></div>'
-            f'<a class="event-link" href="{link}" aria-label="Read the story: {attr(title)}"><img src="img/arrow.svg" alt="" width="40" height="40"></a></li>')
+            + (f'<a class="event-link" href="{attr(link)}" aria-label="Read the story: {attr(title)}"><img src="img/arrow.svg" alt="" width="40" height="40"></a>' if link else '')
+            + '</li>')
     empty = "" if rows else " is-shown"
     return "\n".join(rows), empty
 
@@ -127,10 +163,22 @@ def events_html():
 def parse(path):
     raw = path.read_text()
     m = re.match(r"---\n(.*?)\n---\n(.*)", raw, re.S)
-    meta = {}
-    for line in m.group(1).splitlines():
-        k, _, v = line.partition(":")
-        meta[k.strip()] = v.strip()
+    if not m:
+        raise ValueError("no front matter (the file must start with a --- line and close it with another ---)")
+    meta = {"events": [], "_file": path.name}
+    for n, line in enumerate(m.group(1).splitlines(), 2):
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        k, sep, v = line.partition(":")
+        if not sep or not k.strip():
+            raise ValueError(f"front matter line {n} isn't `key: value`: {line!r}")
+        k, v = k.strip(), v.strip()
+        if k == "event":
+            meta["events"].append(v)
+        elif k in meta:
+            raise ValueError(f"front matter key `{k}` appears twice")
+        else:
+            meta[k] = v
     blocks = []
     for chunk in re.split(r"\n\s*\n", m.group(2).strip()):
         lines = chunk.strip().splitlines()
@@ -146,6 +194,7 @@ def parse(path):
         else:
             blocks.append(("p", " ".join(lines)))
     meta["blocks"] = blocks
+    meta["category"] = SHEET_TO_TAB.get(meta.get("category", ""), meta.get("category", ""))
     meta["card_lead_italic"] = meta.get("card_lead_italic", "true") == "true"
     return meta
 
@@ -351,33 +400,181 @@ def tab_panel(label, card, idx, open_):
     return f'<div class="cat{" is-open" if open_ else ""}">{tab}{panel}</div>'
 
 
-def home(stories):
-    by_slug = {s["slug"]: s for s in stories}
+def tab_owners(stories):
+    """{tab: story slug or house card slug or None}, plus the stories that own no tab (newest first)."""
+    owners = {}
+    for tab in CATEGORIES:
+        cands = [s for s in stories if s["category"] == tab and s.get("feature") != "false"]
+        key = lambda s: (s.get("date") or DEFAULT_DATE, s["_file"])
+        pinned = [s for s in cands if s.get("feature") == "true"]
+        best = max(pinned or cands, key=key, default=None)
+        house = HOUSE_CARDS.get(tab)
+        if house and (best is None or (not pinned and key(best)[0] <= ESCUELA_CARD["date"])):
+            owners[tab] = house
+        else:
+            owners[tab] = best["slug"] if best else None
+    taken = set(owners.values())
+    rest = sorted((s for s in stories if s["slug"] not in taken),
+                  key=lambda s: (s.get("date") or DEFAULT_DATE, s["_file"]), reverse=True)
+    return owners, rest
+
+
+def more_stories_html(rest):
+    """Stories bumped off (or kept off) the tabs. Empty when every story has a tab, so the PSD layout is untouched."""
+    if not rest:
+        return ""
+    rows = []
+    for s in rest:
+        lede, _ = lede_and_intro(s)
+        rows.append(
+            f'    <li class="event reveal"><img src="img/{s["card_image"]}" alt="{attr(s.get("hero_alt", ""))}" loading="lazy" width="1016" height="606">'
+            f'<div class="event-text"><h3>{esc(s["card_title"])}</h3><p class="label">{esc(s["category"])} · {esc(s["kicker"])}</p><p>{esc(lede)}</p></div>'
+            f'<a class="event-link" href="stories/{s["slug"]}/" aria-label="Read the story: {attr(s["card_title"])}"><img src="img/arrow.svg" alt="" width="40" height="40"></a></li>')
+    return ('\n\n<section class="events more-stories" id="more-stories" aria-labelledby="more-h">\n'
+            '  <h2 class="label events-h" id="more-h">More Stories</h2>\n  <ol class="event-list">\n'
+            + "\n".join(rows) + '\n  </ol>\n</section>')
+
+
+def home(stories, events):
     cards = {"escuela": ESCUELA_CARD}
     for s in stories:
         cards[s["slug"]] = {
             "kicker": s["kicker"], "card_title": s["card_title"], "card_image": s["card_image"],
             "card_alt": s.get("hero_alt", ""), "href": f"stories/{s['slug']}/", "excerpt": card_excerpt(s),
         }
-    tabs = "\n".join(tab_panel(label, cards.get(slug) if slug else None, i, label == DEFAULT_OPEN)
-                     for i, (label, slug) in enumerate(CATEGORIES))
+    owners, rest = tab_owners(stories)
+    tabs = "\n".join(tab_panel(label, cards.get(owners[label]) if owners[label] else None, i, label == DEFAULT_OPEN)
+                     for i, label in enumerate(CATEGORIES))
     tpl = (ROOT / "templates" / "home.html").read_text()
-    rows, empty = events_html()
-    return tpl.replace("{{categories}}", tabs).replace("{{events}}", rows).replace("{{events_empty}}", empty)
+    rows, empty = events_html(events)
+    return (tpl.replace("{{categories}}", tabs).replace("{{events}}", rows).replace("{{events_empty}}", empty)
+            .replace("{{more_stories}}", more_stories_html(rest)))
+
+
+# ---------------------------------------------------------------- validation
+REQUIRED = ["slug", "category", "kicker", "title", "card_title", "byline", "card_image", "hero_alt"]
+DIRECTIVES = {"pair", "band", "wide"}
+
+
+def check():
+    """Return (stories, events, errors). Nothing is written."""
+    errors, stories, seen = [], [], {}
+    img = ROOT / "img"
+
+    def need_img(where, name):
+        if not name:
+            errors.append(f"{where}: image name is empty")
+        elif "/" in name or not (img / name).is_file():
+            errors.append(f"{where}: image img/{name} not found")
+
+    for path in sorted(CONTENT.glob("*.md")):
+        f = f"content/{path.name}"
+        try:
+            s = parse(path)
+        except Exception as e:  # noqa: BLE001
+            errors.append(f"{f}: {e}")
+            continue
+        n = len(errors)
+        for k in REQUIRED:
+            if not s.get(k):
+                errors.append(f"{f}: missing `{k}:`")
+        if not (s.get("photo") or s.get("hero")):
+            errors.append(f"{f}: needs `photo:` (or `hero:`)")
+        slug = s.get("slug", "")
+        if slug and not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", slug):
+            errors.append(f"{f}: slug `{slug}` must be lowercase letters, digits and hyphens")
+        if slug and slug != path.stem:
+            errors.append(f"{f}: slug `{slug}` must match the file name ({path.stem})")
+        if slug in seen or slug == "escuela":
+            errors.append(f"{f}: slug `{slug}` is already used by {seen.get(slug, 'the Escuela feature')}")
+        seen[slug] = f
+        if s.get("category") and s["category"] not in CATEGORIES:
+            errors.append(f"{f}: category `{s['category']}` isn't a tab ({', '.join(CATEGORIES)}) or a sheet name ({', '.join(SHEET_TO_TAB)})")
+        if s.get("date"):
+            try:
+                date.fromisoformat(s["date"])
+            except ValueError:
+                errors.append(f"{f}: date `{s['date']}` must be YYYY-MM-DD")
+        for k in ("feature",):
+            if k in s and s[k] not in ("true", "false"):
+                errors.append(f"{f}: `{k}:` must be true or false")
+        for k in ("photo", "hero", "card_image"):
+            if s.get(k):
+                need_img(f"{f} `{k}:`", s[k])
+        for b in s.get("blocks", []):
+            if b[0] == "img":
+                need_img(f"{f} inline image", b[1])
+            elif b[0] == "dir":
+                if b[1] not in DIRECTIVES:
+                    errors.append(f"{f}: unknown directive ::{b[1]} (use ::pair, ::band or ::wide)")
+                elif b[1] == "wide" and not b[2]:
+                    errors.append(f"{f}: ::wide needs `img | alt [| credit]`")
+                elif b[1] in ("band", "wide") and b[2]:
+                    need_img(f"{f} ::{b[1]}", b[2][0])
+        for line in s.get("events", []):
+            try:
+                ev = parse_event(line, f"stories/{slug}/")
+                need_img(f"{f} event {ev[0]}", ev[4])
+            except ValueError as e:
+                errors.append(f"{f}: event `{line[:40]}...`: {e}")
+        if len(errors) == n:
+            try:
+                lede_and_intro(s)
+                story_body(s, "../../")
+            except Exception as e:  # noqa: BLE001
+                errors.append(f"{f}: body doesn't render ({type(e).__name__}: {e}). It needs an opening paragraph "
+                              "(or `dek:`), and every ::pair/::band must sit right before a ## heading")
+                continue
+            stories.append(s)
+    events = []
+    if EVENTS_FILE.exists():
+        for n, line in enumerate(EVENTS_FILE.read_text().splitlines(), 1):
+            if line.strip() and not line.lstrip().startswith("#"):
+                try:
+                    ev = parse_event(line)
+                    need_img(f"content/events.txt line {n}", ev[4])
+                except ValueError as e:
+                    errors.append(f"content/events.txt line {n}: {e}")
+    if not errors:
+        events = load_events(stories)
+        try:
+            home(stories, events)
+        except Exception as e:  # noqa: BLE001
+            errors.append(f"homepage doesn't render: {type(e).__name__}: {e}")
+    return stories, events, errors
 
 
 def main():
-    stories = [parse(p) for p in sorted(CONTENT.glob("*.md"))]
+    stories, events, errors = check()
+    if errors:
+        print(f"build.py: {len(errors)} problem(s); nothing was written:", file=sys.stderr)
+        for e in errors:
+            print("  -", e, file=sys.stderr)
+        sys.exit(1)
+    if "--check" in sys.argv[1:]:
+        owners, rest = tab_owners(stories)
+        print(f"ok: {len(stories)} stories, {len(events)} events")
+        for tab in CATEGORIES:
+            print(f"  tab {tab!r}: {owners[tab] or '(coming soon)'}")
+        if rest:
+            print("  more stories:", ", ".join(s["slug"] for s in rest))
+        return
     for s in stories:
         out = ROOT / "stories" / s["slug"] / "index.html"
         out.parent.mkdir(parents=True, exist_ok=True)
         lede, _ = lede_and_intro(s)
         out.write_text(page(f"{s['title']} | The Austin Local", lede, "../../", "is-story", story_body(s, "../../")))
         print("wrote", out.relative_to(ROOT))
+    # a story whose .md was deleted loses its page (only folders holding nothing but a generated index.html)
+    slugs = {s["slug"] for s in stories}
+    for d in sorted((ROOT / "stories").glob("*/")):
+        if d.name not in slugs and [x.name for x in d.iterdir()] == ["index.html"]:
+            shutil.rmtree(d)
+            print("removed", d.relative_to(ROOT))
     (ROOT / "index.html").write_text(page(
         "The Austin Local",
         "Stories, food, culture and events from around Austin.",
-        "", "is-home", home(stories)))
+        "", "is-home", home(stories, events)))
     print("wrote index.html")
 
 

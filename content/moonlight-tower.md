@@ -11,6 +11,7 @@ card_image: moonlight-tower-2.jpg
 card_lead_italic: true
 hero_alt: Strings of colored lights spiraling up the Zilker Holiday Tree, a moonlight tower in Zilker Park
 source: TODO-7-moonlight-tower-article.docx
+event: 2026-11-29 | Zilker Holiday Tree Lighting | Zilker Park, 2100 Barton Springs Road | The Austin Civic Wind Ensemble starts at 5:15 p.m. on the park's south side, and the ceremony begins at 6. Free. After opening night the tree stays lit every night through New Year's Day, 6 to 10 p.m. | story-moonlight-tower.jpg | Strings of colored lights on the Zilker Holiday Tree
 ---
 
 Most cities buy a tree for the holidays. Austin uses a streetlight from 1894.

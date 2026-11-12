@@ -1,0 +1,3 @@
+# Standalone calendar events (ones with no story). A story's own events go in its front matter as `event:` lines.
+# One event per line:  YYYY-MM-DD | title | location | text | image (in img/) | alt [| link]
+# Past events drop off the calendar automatically. Lines starting with # are ignored.
