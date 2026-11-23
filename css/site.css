@@ -1,10 +1,11 @@
-/* The Austin Local: built from YMAU_AustinBlog_LP-00.psd and YMAU_AustinBlog_InteriorStory-01.psd (both 1920 wide).
-   Comments give PSD pixel positions. Stevie Sans is an Adobe Fonts face; Hanken Grotesk stands in until a kit is added. */
+/* This Side of Austin: built from Harley's PSDs of 2026-11-20, "This Side of Austin - Blog LP / Interior / Wendi + Seven"
+   (all 1920 wide). Comments give PSD pixel positions. Stevie Sans is an Adobe Fonts face; Hanken Grotesk is the fallback. */
 
 :root {
   --ink: #000;
   --paper: #fff;
-  --mist: #f4f4f4;      /* story header + about band */
+  --mist: #f4f4f4;      /* story header + tips box */
+  --coal: #343434;      /* footer */
   --sage: #d1dbd9;      /* category band + story band */
   --soft: #6b6b6b;      /* captions */
   --f: "stevie-sans", "Hanken Grotesk", system-ui, sans-serif;
@@ -39,6 +40,7 @@ button { font: inherit; color: inherit; }
   --side: calc((100cqw - var(--col)) / 2);
 }
 .col { width: var(--col); margin-inline: auto; }
+.rule { height: 0; border: 0; border-top: 1px solid var(--ink); margin-block: 0; }
 
 .label {
   font-weight: var(--reg);
@@ -52,62 +54,83 @@ button { font: inherit; color: inherit; }
   position: relative;
   height: clamp(560px, 41.667cqw, 800px);
   color: #fff;
-  background: #1c0b03;
+  background: #2a2522;
+  --hx: max(24px, 8.6cqw);                   /* logo + copy sit at x 165, not on the column */
 }
 .hero-media { position: absolute; inset: 0; overflow: hidden; }
-.hero-media img { width: 100%; height: 100%; object-fit: cover; }
-/* the PSD's masked darkening is baked into escuela-hero.jpg (rendered from the PSD layers) */
-.hero-inner { position: absolute; inset: 0; padding-left: var(--side); }
-.hero-logo { position: absolute; top: 12.25%; left: var(--side); width: 143px; }  /* 398,98 */
-.hero-copy { position: absolute; top: 44%; left: var(--side); }                  /* title cap at 376 */
-.hero h1 { font-size: clamp(46px, 3.54cqw, 68px); line-height: .95; }
-.hero-dek { margin-top: 40px; max-width: 390px; font-style: italic; }              /* 530 */
-.hero-read {                                                                       /* line 647 → 895 */
-  position: absolute;
-  top: 80.875%;
-  left: var(--side);
-  height: calc(19.125% + 95px);
-  padding-left: 13px;
-  text-decoration: none;
-  font-weight: var(--reg);
-  font-size: 16px;
-  line-height: 15px;
+.hero-media img { width: 100%; height: 100%; object-fit: cover; object-position: 60% 50%; }
+/* the PSD's darkening is baked into santa-hero.jpg (rendered from the PSD layers) */
+.hero-inner { position: absolute; inset: 0; }
+.hero-logo { position: absolute; top: 8.75%; left: var(--hx); width: 224px; }        /* 166,70 */
+.hero-logo img { width: 100%; height: auto; }
+.hero-copy { position: absolute; bottom: 7.75%; left: var(--hx); right: 24px; }      /* title cap 519, dek ends 736 */
+.hero h1 {
+  font-size: clamp(40px, 3.39cqw, 65px);
+  line-height: .943;
+  letter-spacing: -.042em;
   text-transform: uppercase;
 }
-.hero-read::before {
-  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 1px;
-  background: linear-gradient(#fff 0 calc(100% - 95px), var(--ink) 0);
-}
+.hero-dek { margin-top: 22px; font-weight: var(--book); font-size: 22px; line-height: 26px; }   /* 714 */
 
-/* ============================================================ HOME: featured story (981–3044) */
-.feature { padding-top: 176px; }
-.feature-lede { max-width: 800px; font-weight: var(--med); letter-spacing: .015em; }
-.feature-dish { margin-top: 64px; aspect-ratio: 1128 / 408; overflow: hidden; }
-.feature-dish img, .feature-sign img, .feature-taco img { width: 100%; height: 100%; object-fit: cover; }
+/* ============================================================ HOME: featured story (800–2932) */
+.feature { padding-top: 56px; }                                        /* lede cap 861 */
+.feature-lede { max-width: 610px; font-weight: var(--reg); }
+.feature .rule { margin-top: 44px; }                                   /* 963 */
+.feature .sec h2 { font-weight: var(--reg); text-transform: none; }
+.feature-img img { width: 100%; height: 100%; object-fit: cover; }
 
-.feature-row { display: grid; align-items: start; }
-.feature-row--a { margin-top: 44px; grid-template-columns: 540fr 53fr 532fr; }   /* image 191–938, text 991–1509 */
-.feature-row--a .feature-sign {
-  grid-column: 1;
-  --out: min(207px, var(--side) - 24px);
-  margin-left: calc(-1 * var(--out));
-  width: calc(100% + var(--out));
-  aspect-ratio: 747 / 565;
+.feature-a {                                                           /* text 400–966, image 1032–1618 × 1017–1464 */
+  --out: min(95px, var(--side) - 24px);
+  width: calc(var(--col) + var(--out));
+  margin: 54px 0 0 var(--side);
+  display: grid;
+  grid-template-columns: 570fr 62fr 586fr;                             /* the PSD's text frame is ~570 wide */
+  align-items: start;
 }
-.feature-row--a .feature-text { grid-column: 3; padding-top: 15px; }
-.feature-full { margin-top: 40px; }
-.feature-row--b { margin-top: 36px; grid-template-columns: 552fr 72fr 501fr; }   /* text 400–952, image 1022–1620 */
-.feature-row--b .feature-text { grid-column: 1; padding-top: 4px; }
-.feature-row--b .feature-taco {
-  grid-column: 3;
-  --out: min(97px, var(--side) - 24px);
-  width: calc(100% + var(--out));
-  aspect-ratio: 598 / 518;
-}
+.feature-a .sec { grid-column: 1; padding-top: 2px; }
+.feature-a .feature-img { grid-column: 3; aspect-ratio: 586 / 447; }
+.feature-full { margin-top: 8px; }                                     /* 1476 */
 
-/* ============================================================ HOME: category accordion (3199–4134) */
+.feature-b {                                                           /* image 161–801 × 1770–2270, text 860–1538 */
+  --out: min(237px, var(--side) - 24px);
+  width: calc(var(--col) + var(--out) + min(15px, var(--side) - 24px));
+  margin: 44px 0 0 calc(var(--side) - var(--out));
+  display: grid;
+  grid-template-columns: 640fr 59fr 678fr;
+  align-items: start;
+}
+.feature-b .feature-img { grid-column: 1; aspect-ratio: 640 / 500; }
+.feature-b-text { grid-column: 3; }
+.feature-b .sec + .sec { margin-top: 37px; }                           /* 2101 */
+
+.tips {                                                                /* 398–1525 × 2330–2790 */
+  margin-top: 60px;
+  display: grid;
+  grid-template-columns: 88fr 453fr 90fr 496fr;
+  min-height: clamp(360px, 23.96cqw, 460px);
+  background: var(--mist);
+}
+.tips-text { grid-column: 2; padding: 52px 0 48px; }
+.tips-text h2 { margin-bottom: 24px; }
+.tips-text ul { margin: 0; padding-left: 1.1em; }
+.tips .tips-text li + li { margin-top: 17px; }
+.tips-text ul + p { margin-top: 23px; }
+.tips-img { grid-column: 4; }
+.tips-img img { width: 100%; height: 100%; object-fit: cover; }
+
+.rule--author { margin-top: 64px !important; }                         /* 2855 */
+.meet { margin-top: 57px; text-align: center; }                        /* 2918 */
+.meet a {
+  font-weight: var(--reg);
+  text-transform: uppercase;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.meet a:hover, .meet a:focus-visible { text-decoration-thickness: 2px; }
+
+/* ============================================================ HOME: category accordion (3007–3942) */
 .categories {
-  margin-top: 155px;
+  margin-top: 75px;
   display: flex;
   min-height: clamp(640px, 48.7cqw, 935px);
   background: var(--sage);
@@ -177,8 +200,8 @@ button { font: inherit; color: inherit; }
 .cat-empty { align-self: center; padding-left: 74px; }
 .cat-empty .cat-title { margin-top: 12px; }
 
-/* ============================================================ HOME: events (4343–6296) */
-.events { width: min(1436px, 100cqw - 48px); margin: 209px auto 0; }
+/* ============================================================ HOME: events (4031–5984) */
+.events { width: min(1436px, 100cqw - 48px); margin: 89px auto 0; }
 .events-h { padding-bottom: 14px; border-bottom: 1px solid var(--ink); }
 .event-list { list-style: none; margin: 98px 0 0; padding: 0; }
 .event {
@@ -200,82 +223,76 @@ button { font: inherit; color: inherit; }
 .event-link { grid-column: 7; width: 40px; transition: transform .3s var(--ease); }
 .event-link:hover { transform: translate(3px, -3px); }
 
-/* ============================================================ about / footer (6464–7221; story 4495–5252) */
-.about { margin-top: 168px; position: relative; }
-.is-story .about { margin-top: 142px; }
-.about > .label {
-  position: relative;
-  margin-left: 11.09%;                     /* x 213 */
-  padding-top: 0;
-  height: 102px;
+/* ============================================================ footer (LP 6069–6529; story 3997–4464) */
+.site-foot {
+  margin-top: 85px;
+  padding: 101px 24px 140px;
+  background: var(--coal);
+  color: #fff;
+  text-align: center;
 }
-.about > .label::before {                  /* line 6464–6672, x 200 */
-  content: ""; position: absolute; left: -13px; top: 0; width: 1px; height: 208px; background: var(--ink); z-index: 1;
-}
-.about-band {
-  display: grid;
-  grid-template-columns: 6.25% 18% 7.5% 26.9% 7.6% 1fr;
-  align-items: center;
-  min-height: clamp(420px, 34.1cqw, 655px);
-  background: var(--mist);
-}
-.about-logo { grid-column: 2; }
-.about-logo img { width: 100%; height: auto; }
-.about-text { grid-column: 4; }
-.about-img { grid-column: 6; align-self: stretch; }
-.about-img img { width: 100%; height: 100%; object-fit: cover; }
+.is-story .site-foot { margin-top: 81px; }
+.foot-logo { display: inline-block; width: 255px; }                    /* 833–1088 × 6170 */
+.foot-logo img { width: 100%; height: auto; }
+.foot-text { max-width: 1105px; margin: 44px auto 0; }                 /* 408–1513, cap 6306 */
 
-/* ============================================================ STORY page */
+/* ============================================================ STORY page (interior PSD; the Wendi + Seven page is .is-profile) */
 .story-head {
   background: var(--mist);
   text-align: center;
-  padding: 100px 24px 335px;               /* band ends 228px into the hero image */
+  padding: 67px 24px 440px;                /* band ends 348px into the hero image (901) */
 }
-.story-logo { display: inline-block; width: 273px; }
+.story-logo { display: inline-block; width: 224px; }                  /* 848,67 */
 .story-logo img { width: 100%; height: auto; }
-.story-head .label { margin-top: 113px; font-weight: var(--light); }   /* 313 */
+.story-head .label { margin-top: 74px; font-weight: var(--light); }   /* 225 */
 .story-head h1 {
-  margin: 48px auto 0;                     /* 377 */
+  margin: 31px auto 0;                     /* 272 */
   max-width: 840px;
   text-wrap: balance;
   font-size: clamp(36px, 3.54cqw, 68px);
-  line-height: .95;
+  line-height: .955;
 }
 .byline { margin-top: 22px; }
+.story-head:has(.byline) { padding-bottom: 394px; }                   /* the byline isn't in the PSD; keep the image at 553 */
+.is-profile .story-head { padding-bottom: 372px; }                    /* band ends 286px into the image (799) */
+.is-profile .story-head .label { margin-top: 104px; }                 /* 255 */
 
-.story-hero { width: var(--col); margin: -228px auto 0; }    /* 398–1523 × 673–1242 */
+.story-hero { width: var(--col); margin: -348px auto 0; }             /* 398–1523 × 553–1122 */
+.is-profile .story-hero { margin-top: -286px; }
 .story-hero img { width: 100%; aspect-ratio: 1125 / 569; object-fit: cover; height: auto; }
 figcaption { margin-top: 8px; font-size: 12px; line-height: 16px; color: var(--soft); text-align: right; }
 
-.story .lede {                              /* 963–1442 at 1355 */
-  margin: 113px 0 0 50.2%;
+.story .lede {                             /* 399–874 at 1171 */
+  margin-top: 44px;
   max-width: 480px;
-  font-weight: var(--med);
-  letter-spacing: .015em;
+  font-weight: var(--reg);
 }
-.intro { margin-top: 137px; }               /* 1527 */
+.story .lede--dek { font-style: italic; font-weight: var(--book); }
+.story > hr.rule { margin-top: 38px; }       /* 1246 */
+.story > .col.intro { margin-top: 50px; }  /* 1302 */
 .story > .col { margin-top: 57px; }
-.story > .col.intro { margin-top: 137px; }
-.story > .col:first-of-type { margin-top: 0; }
+.story > div.col:first-of-type { margin-top: 0; }
 
-.sec h2 { font-size: 16px; line-height: 21px; margin-bottom: 18px; text-transform: capitalize; }
+.sec h2 { font-size: 16px; line-height: 21px; margin-bottom: 18px; text-transform: capitalize; font-weight: var(--reg); }
+.band .sec h2 { font-weight: var(--med); }
 .sec ul { margin: 21px 0 0; padding-left: 1.1em; }
 .sec ul + p { margin-top: 21px; }
 .sec li + li { margin-top: 4px; }
-.inline-fig { margin-top: 69px; }
-.inline-fig img { width: 100%; height: auto; }   /* natural ratio: the PSD's seafood shot is pre-cropped to 524 × 389 */
+.inline-fig { margin-top: 40px; }
+.inline-fig + p { margin-top: 40px; }
+.inline-fig img { width: 100%; height: auto; }   /* natural ratio: the PSD's seafood shot is pre-cropped to 524 × 418 */
 
 .pair { display: grid; grid-template-columns: 531fr 72fr 522fr; align-items: start; }
 .pair > :first-child { grid-column: 1; }
 .pair > :last-child { grid-column: 3; }
-.story > .pair { margin-top: 155px; }
+.story > .pair { margin-top: 85px; }
 
-.story > .col:has(.wide-fig) { margin-top: 75px; }
-.story > .col:has(.wide-fig) + .col { margin-top: 90px; }
+.story > .col:has(.wide-fig) { margin-top: 55px; }
+.story > .col:has(.wide-fig) + .col { margin-top: 70px; }
 .wide-fig img { width: 100%; aspect-ratio: 1125 / 468; object-fit: cover; }
 
-.band { margin-top: 178px; background: var(--sage); }
-.band + .col, .band + .pair { margin-top: 155px !important; }
+.band { margin-top: 76px; background: var(--sage); }
+.band + .col, .band + .pair { margin-top: 85px !important; }
 .band--img { display: grid; grid-template-columns: 46.93% 5.2% 1fr; min-height: clamp(420px, 31.3cqw, 600px); }
 .band--img .band-img { grid-column: 1; position: relative; }
 .band-img figcaption { position: absolute; right: 12px; bottom: 10px; margin: 0; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.7); }
@@ -290,8 +307,7 @@ figcaption { margin-top: 8px; font-size: 12px; line-height: 16px; color: var(--s
    build.py adds .has-stevie when the kit is on. Kit weights: Light 300, Book 400, Regular 500, Medium 600, Light Italic.
    At these sizes Stevie matches the PSD's line widths within 1%; the Hanken values above are the fallback's calibration. */
 .has-stevie { --light: 300; --book: 400; --reg: 500; --med: 600; }
-.has-stevie .hero h1, .has-stevie .story-head h1 { font-size: clamp(44px, 3.44cqw, 66px); }
-.has-stevie .feature-lede, .has-stevie .story .lede { letter-spacing: 0; }
+.has-stevie .story-head h1 { font-size: clamp(36px, 3.49cqw, 67px); }
 .has-stevie .cat-title { font-size: 24px; }
 .has-stevie .event-date b { font-size: 53px; }
 
@@ -300,15 +316,15 @@ figcaption { margin-top: 8px; font-size: 12px; line-height: 16px; color: var(--s
 .js .reveal.is-in { opacity: 1; transform: none; }
 .js .hero-media img { transform: scale(1.06); transition: transform 2.4s var(--ease); }
 .js .is-loaded .hero-media img { transform: scale(1); }
-.js .hero-copy, .js .hero-logo, .js .hero-read { opacity: 0; transition: opacity 1s .3s var(--ease), transform 1s .3s var(--ease); transform: translateY(14px); }
-.js .is-loaded .hero-copy, .js .is-loaded .hero-logo, .js .is-loaded .hero-read { opacity: 1; transform: none; }
+.js .hero-copy, .js .hero-logo { opacity: 0; transition: opacity 1s .3s var(--ease), transform 1s .3s var(--ease); transform: translateY(14px); }
+.js .is-loaded .hero-copy, .js .is-loaded .hero-logo { opacity: 1; transform: none; }
 .js .cat { transition: flex-grow .7s var(--ease); }
 .js .cat-panel { transition: opacity .5s var(--ease); }
 .js .cat:not(.is-open) .cat-panel { opacity: 0; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .js .reveal, .js .hero-copy, .js .hero-logo, .js .hero-read { opacity: 1; transform: none; transition: none; }
+  .js .reveal, .js .hero-copy, .js .hero-logo { opacity: 1; transform: none; transition: none; }
   .js .hero-media img { transform: none; transition: none; }
   .js .cat, .js .cat-panel { transition: none; }
 }
@@ -322,17 +338,24 @@ figcaption { margin-top: 8px; font-size: 12px; line-height: 16px; color: var(--s
 
 @media (max-width: 900px) {
   .hero { height: min(88svh, 640px); }
-  .hero-logo { top: 32px; }
+  .hero-logo { top: 32px; width: 168px; }
   .hero-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.6), rgba(0,0,0,0) 65%); }
-  .hero-dek br { display: none; }
-  .hero-copy { top: auto; bottom: 120px; right: 24px; }
-  .hero-read { top: auto; bottom: -95px; height: 175px; }
-  .feature { padding-top: 140px; }
-  .feature-dish { margin-top: 40px; aspect-ratio: 3 / 2; }
-  .feature-row, .pair { display: block; }
-  .feature-row--a .feature-sign, .feature-row--b .feature-taco { width: 100%; margin: 0; }
-  .feature-row--a .feature-text { padding-top: 32px; }
-  .feature-row--b .feature-taco { margin-top: 32px; }
+  .hero h1 br { display: none; }
+  .hero-copy { bottom: 40px; }
+  .hero-dek { font-size: 18px; line-height: 23px; margin-top: 16px; }
+  .feature { padding-top: 48px; }
+  .feature .rule { margin-top: 32px; }
+  .feature-a, .feature-b, .pair, .tips { display: block; }
+  .feature-a, .feature-b { width: var(--col); margin: 40px auto 0; }
+  .feature-a .feature-img { margin-top: 32px; }
+  .feature-full { margin-top: 48px; }
+  .feature-b-text { margin-top: 32px; }
+  .tips { margin-top: 48px; }
+  .tips-text { padding: 36px 24px 40px; }
+  .tips-img { aspect-ratio: 1; }
+  .rule--author { margin-top: 48px !important; }
+  .meet { margin-top: 40px; }
+  .categories { margin-top: 56px; }
 
   .categories { flex-direction: column; height: auto; }
   .js .cat, .cat { flex-direction: column; flex: none; transition: none; }
@@ -359,22 +382,20 @@ figcaption { margin-top: 8px; font-size: 12px; line-height: 16px; color: var(--s
   .event-date span { font-size: 18px; }
   .event-date b { font-size: 40px; line-height: 40px; margin-top: 6px; }
 
-  .about { margin-top: 120px; }
-  .about > .label { margin-left: 37px; }
-  .about > .label::before { height: 150px; }
-  .about-band { grid-template-columns: 24px 1fr 24px; padding-top: 72px; }
-  .about-logo { grid-column: 2; width: 220px; }
-  .about-text { grid-column: 2; margin-top: 32px; }
-  .about-img { grid-column: 1 / -1; margin-top: 48px; aspect-ratio: 1; }
+  .events { margin-top: 72px; }
+  .site-foot, .is-story .site-foot { margin-top: 72px; padding: 64px 24px 72px; }
+  .foot-logo { width: 200px; }
+  .foot-text { margin-top: 32px; }
 
-  .story-head { padding: 56px 24px 200px; }
-  .story-logo { width: 200px; }
-  .story-head .label { margin-top: 64px; }
-  .story-head h1 { margin-top: 28px; }
-  .story-hero { margin-top: -120px; }
-  .story .lede { margin: 56px 0 0; max-width: none; }
-  .intro, .story > .col.intro { margin-top: 40px; }
-  .story > .col, .story > .pair, .band, .band + .col, .band + .pair { margin-top: 56px !important; }
+  .story-head, .is-profile .story-head { padding: 48px 24px 160px; }
+  .story-logo { width: 168px; }
+  .story-head .label, .is-profile .story-head .label { margin-top: 48px; }
+  .story-head h1 { margin-top: 24px; }
+  .story-hero, .is-profile .story-hero { margin-top: -120px; }
+  .story .lede { margin-top: 32px; max-width: none; }
+  .story > .rule { margin-top: 32px; }
+  .story > .col.intro { margin-top: 32px; }
+  .story > .col, .story > .pair, .band, .band + .col, .band + .pair { margin-top: 48px !important; }
   .pair > :last-child { margin-top: 56px; }
   .band--img { display: block; }
   .band--img .band-img img { aspect-ratio: 3 / 2; height: auto; }

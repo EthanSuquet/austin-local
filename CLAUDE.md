@@ -1,9 +1,17 @@
-# The Austin Local (YMAU Austin Blog)
+# This Side of Austin (YMAU Austin Blog; formerly The Austin Local)
 
-**What it is (2026-11-10):** a static blog site, **The Austin Local**, for the YMAU account (Asana job
-`26394 Austin Blog Design`, Harley's design). It's built from two PSDs in `~/Downloads/`:
-`YMAU_AustinBlog_LP-00.psd` (landing page, 1920 × 7220) and `YMAU_AustinBlog_InteriorStory-01.psd`
-(story template, 1920 × 5251). It's a **GitHub Pages demo**; Ethan will sort out the domain later.
+**What it is (2026-11-10):** a static blog site for the YMAU account (Asana job `26394 Austin Blog Design`,
+Harley's design). It's a **GitHub Pages demo**; Ethan will sort out the domain later.
+
+**Renamed 2026-11-20: "This Side of Austin."** Harley's Slack DM to Ethan that day brought a new name and logo, a new
+featured story, spacing changes and a new Wendi + Seven page. The site follows three PSDs in `~/Downloads/` since 2026-11-23:
+`This Side of Austin - Blog LP.psd` (1920 × 6529), `... - Blog Interior.psd` (1920 × 4463) and
+`... - Blog Wendi + Seven.psd` (1920 × 2786). The first PSDs (`YMAU_AustinBlog_LP-00.psd`,
+`YMAU_AustinBlog_InteriorStory-01.psd`) are superseded.
+- **Domain chosen: thissideofaustin.com** (Jason bought it 2026-11-20; Asana `26405 MPAUS Blog Handles` →
+  "MPAUS - Blog Launch - Programming", assigned to Ethan). TJ's comment there gives the hosting (FTP on
+  `host.mtboston.com`). The upload is still to do (Ethan, 2026-11-23: "fix in github for now, domain after").
+  ⚠️ TJ's comment spells it `thissideofuastin.com` (typo) in both the domain and the FTP username.
 
 - Repo: `EthanSuquet/austin-local` (**public**, so Pages works on the free plan; Ethan OK'd it 2026-11-10).
   Pages is built from branch **`demo`** by GitHub Actions (`.github/workflows/build.yml`, since 2026-11-12): every
@@ -30,8 +38,15 @@
   ties go to the later file name). `feature: false` keeps a story off the tabs. Stories that own no tab are still
   built and listed in a "More Stories" block under the calendar (reuses the calendar's row styles; it only appears
   when there's such a story, so the PSD layout is untouched otherwise). `category:` also accepts the sheet's names.
-  The Escuela feature ("Room to Grow") lives in `templates/home.html`, because the PSD lays it out by hand; its card
-  (`ESCUELA_CARD`) holds the Eat + Drink tab until an Eat + Drink story is pinned or dated after 2026-11-10.
+- **The homepage feature is Wendi's "All I Want for Christmas Is a Good Photo of My Dog"** (2026-11-20 PSD), laid out
+  by hand in `templates/home.html` (text verbatim from the PSD). Its four events are in `content/events.txt` and link
+  to its sections. "Meet the Author" links to `wendi-seven/`: `content/wendi-seven.md`, a **profile page**
+  (`layout: profile`; built to `<slug>/`, no tab, no card, no events). A new profile page also needs its folder added
+  to the `cp` line in `.github/workflows/build.yml`, or it won't deploy.
+- **Escuela ("Room to Grow")**, the homepage feature until 2026-11-20, is a regular story now (`content/escuela.md`,
+  no byline, undated) and holds Eat + Drink until a newer or pinned Eat + Drink story arrives. `ESCUELA_CARD` is gone.
+- The footer (dark band, white logo, About copy) is `footer()` in `build.py`; the copy is the PSD's, Harley's
+  condensed version of Ethan's 2026-11-10 About text.
 - New article: add `content/<slug>.md` and its photos (`img/<slug>-*.jpg`), push to `demo`. No code edit.
   Deleting the `.md` removes its page on the next build.
 
@@ -121,28 +136,37 @@ or a body that won't render. A failed check fails the Action, and the live site 
 
 ## Rules
 - **Match the PSD** (house rule). PSD pixel positions are commented in `css/site.css`. At 1920 every
-  homepage section sits within ~6px of the PSD; the page is 380px shorter only because the calendar has 4 rows, not 5.
+  homepage section sits within ~6px of the PSD (re-checked 2026-11-23 against the new PSDs; story and Wendi pages too).
 - **Font: Stevie Sans via Adobe Fonts web project "The Austin Local", ID `rqk0gvx`** (created 2026-11-10 in the
   Adobe account Chrome is signed in to, Swish's). Five styles: Light 300, Light Italic, Book 400, Regular 500,
   Medium 600. Set in `build.py` (`ADOBE_KIT`), which adds `.has-stevie` to `<body>`; the overrides are the
   "Stevie Sans" block in `css/site.css`. At the PSD's own sizes (body 16/21, H1 66px) it matches the PSD's line
   widths within 1%. Clearing `ADOBE_KIT` falls back to Hanken Grotesk, already calibrated. Don't self-host Stevie:
   Adobe Fonts covers web projects only.
-- The hero background `img/escuela-hero.jpg` is **rendered from the PSD layers** (photo + its masked
-  black fill). Don't re-crop the raw photo; the PSD's uneven darkening won't match with a CSS overlay.
+- The hero background `img/santa-hero.jpg` is **rendered from the PSD layers** (photo + its clipped, masked fill).
+  Don't re-crop the raw photo; the PSD's darkening won't match with a CSS overlay. The feature and Wendi photos are
+  cropped from the smart objects' originals to the PSD frames at 2×.
+- Logos: `img/logo-white.svg` / `logo-gray.svg` (#8e8e8e) are the PSD's vector smart object, via `pdftocairo -svg`.
 - Motion: hero zoom-out, 22px fade-ups that replay, accordion width animation. Every class that hides
   content is added by JS; reduced motion gets a plain page.
 
+## Open (2026-11-23)
+- **Typos in the PSD text, kept verbatim:** "Meanwhile-braned" (homepage feature) and "here in Austin Local"
+  (Wendi + Seven, the old name). Ethan to decide whether to correct them.
+- The Wendi + Seven dek is Stevie **Book Italic** in the PSD; the Adobe web project only has Light Italic, so it
+  renders in Light Italic. Adding Book Italic to project `rqk0gvx` fixes it.
+- The homepage hero dog ("Golden Retriever in a Cozy Christmas Sweater") looks like stock or AI imagery; source
+  unknown. It's also the Tail of Lights calendar thumbnail.
+
 ## Open (2026-11-10)
 - **Culture + Community** (= the sheet's Health & Wellness) has no story yet ("Stories coming soon"); the 11/2 sheet confirmed none.
-- **About copy** is Ethan's (2026-11-10), in `about()` in `build.py`.
 - **Calendar of events:** dated, upcoming events from the articles, as `event:` lines in each story's front matter
   (standalone events: `content/events.txt`; same `date | title | location | text | image | alt [| link]` format; the
   weekday is derived). **Past events drop off automatically** (Ethan, 2026-11-10): the build skips any event dated before
   today in Austin time, and `js/site.js` removes them in the browser the morning after, so the live page stays
   right without a rebuild. With none left it shows "More events coming soon." Test with `?today=YYYY-MM-DD`.
-  Sweet Home's Sunday worship was taken off (it'd be past by launch).
-- Image rights to confirm before this leaves demo: the Hotel Trinity bar, room and seafood images look
+  Sweet Home's Sunday worship was taken off (it'd be past by launch). Same-day events show in file order.
+- Image rights to confirm before this leaves demo (still open 2026-11-23): the Hotel Trinity bar, room and seafood images look
   AI-generated ("Illuminated Octopus Bar Lounge.png" etc.) but show as the real hotel. The Sweet Home tab
   photo is `Sweethome-Missionary-04-Bud-Franck.jpg` (likely Austin Chronicle). The Escuela photos have no credit.
 - `escuela-dish.jpg` is only 800px wide in the PSD (shown at 1,125). It needs the original.
@@ -150,4 +174,5 @@ or a body that won't render. A failed check fails the Action, and the live site 
 ## Preview
 `.claude/launch.json` → `austin-local` (python http.server on 127.0.0.1:8791). For full-page 1920
 screenshots use puppeteer from `Teeej Design/server2/node_modules` with the puppeteer
-`chrome-headless-shell` in `~/.cache/puppeteer` (never `/Applications/Google Chrome`).
+`chrome-headless-shell` (never `/Applications/Google Chrome`). ⚠️ 2026-11-23: `~/.cache/puppeteer` is gone; the one at
+`~/.cache/hyperframes/chrome/chrome-headless-shell/mac_arm-*/chrome-headless-shell-mac-arm64/` works.

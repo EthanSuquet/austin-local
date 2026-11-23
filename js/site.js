@@ -1,4 +1,4 @@
-// The Austin Local: hero load-in, scroll reveals, category accordion.
+// This Side of Austin: hero load-in, scroll reveals, category accordion.
 (function () {
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 

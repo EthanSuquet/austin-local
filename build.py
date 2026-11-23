@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""Build The Austin Local demo site.
+"""Build the This Side of Austin demo site (renamed from The Austin Local, 2026-11-20).
 
     python3 build.py           validate, then build (stops with errors if a story is invalid)
     python3 build.py --check   validate only (front matter, images, slugs, events); exit 1 on any error
 
 Reads content/*.md (one file per story) plus content/events.txt (standalone events) and writes:
-    index.html                     the landing page (YMAU_AustinBlog_LP-00.psd)
-    stories/<slug>/index.html      one page per story (YMAU_AustinBlog_InteriorStory-01.psd)
+    index.html                     the landing page ("This Side of Austin - Blog LP.psd")
+    stories/<slug>/index.html      one page per story ("This Side of Austin - Blog Interior.psd")
+    <slug>/index.html              a profile page (`layout: profile`; wendi-seven/, from
+                                   "This Side of Austin - Blog Wendi + Seven.psd"). Profile pages aren't stories:
+                                   no tab, no card, no events. The Pages workflow copies each one's folder by name.
 
 Edit content/ and this file. Never edit the generated .html; the next build overwrites it.
 
@@ -17,12 +20,19 @@ Story file format: front matter between --- lines, then the body.
     ::pair               the next two sections sit side by side
     ::band [img | alt [| credit]]   the next section is a full-width sage band (image on the left if given)
     ::wide img | alt [| credit]   a full-column image between sections
-The first paragraph (or the `dek`, if there is one) is the bold lede.
+    ::text               ends a band or pair section; the paragraphs after it are a plain section
+Paragraphs right after a directive need no `## Heading`: they make an untitled section.
+A single line break inside a paragraph stays a line break.
+The first paragraph (or the `dek`, if there is one) is the lede, under the hero image.
 
 Front matter (one `key: value` per line):
     slug          required; lowercase letters, digits, hyphens; must match the file name (content/<slug>.md)
     category      required; a homepage tab name (CATEGORIES) or a weekly-sheet name (SHEET_TO_TAB keys)
-    kicker, title, card_title, byline, card_image, hero_alt   required
+    kicker, title, card_title, card_image, hero_alt   required
+    byline        optional: "By ..." under the title
+    card_alt      optional: the tab card image's alt text (default hero_alt)
+    card_words    optional: how many words the tab card's excerpt runs to (default 110)
+    layout        optional: `profile` makes a profile page (needs only slug, title, hero, hero_alt; italic lede)
     photo         required unless `hero` is set: the story's lead photo; `photo_credit` is its caption
     hero          optional: a lead image with no credit (overrides photo as the page's hero)
     dek           optional: the lede, instead of the first paragraph
@@ -47,6 +57,7 @@ from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parent
 CONTENT = ROOT / "content"
+SITE = "This Side of Austin"  # Harley's PSDs of 2026-11-20 renamed the blog from "The Austin Local"
 
 # Homepage accordion: the PSD's tab names, in PSD order. Each tab shows one story; None = nothing there yet.
 # The weekly Austin Blog sheet (Austin-Blog-Weekly-Sheet-2026-11-02, v5) uses its own category names; they map
@@ -65,23 +76,8 @@ SHEET_TO_TAB = {
 # code edit here.
 CATEGORIES = ["What's Happening", "Eat + Drink", "Culture + Community", "The Future", "People", "The Austin Vibe"]
 DEFAULT_OPEN = "What's Happening"  # the open tab in the PSD
-# The Escuela feature is laid out by hand in templates/home.html; its card holds the Eat + Drink tab until an
-# Eat + Drink story is pinned or dated after it.
-HOUSE_CARDS = {"Eat + Drink": "escuela"}
-
-ESCUELA_CARD = {
-    "slug": "escuela",
-    "kicker": "Oak Hill",
-    "card_title": "Room to Grow",
-    "card_image": "escuela-sign.jpg",
-    "card_alt": "The Escuela Oak Hill mosaic sign",
-    "href": "#story",
-    "date": "2026-11-10",
-    "excerpt": [
-        ("em", "A 1923 Oak Hill schoolhouse gets a second life as a farm-to-table Tex-Mex restaurant. We went to see if it makes the grade."),
-        ("p", "If you've headed out toward Dripping Springs, you've likely passed a low, nondescript limestone building tucked behind a stand of heritage oaks, right where the 290 and 71 split. For half a century it was the site of Oak Hill Elementary. Since September it's been Escuela, Oak Hill's buzzed-about farm-to-table Tex-Mex arrival, and another reminder that some of this city’s best new places stem from our deepest roots."),
-    ],
-}
+# Escuela ("Room to Grow") was the hand-laid homepage feature until 2026-11-20; it's content/escuela.md now and
+# claims Eat + Drink like any story. The homepage feature (templates/home.html) is the Santa-photo story.
 
 # Adobe Fonts web project for Stevie Sans (fonts.adobe.com/fonts/stevie-sans; CSS name "stevie-sans").
 # Paste the project ID (the "abc1def" in use.typekit.net/abc1def.css) here and rebuild. Empty = Hanken Grotesk stand-in.
@@ -111,7 +107,7 @@ def attr(s):
 #     even if nobody rebuilds. If no events are left, "More events coming soon." shows instead.
 # The weekday and day number come from the date.
 EVENTS_FILE = CONTENT / "events.txt"
-DEFAULT_DATE = "2026-11-10"  # stories (and the Escuela feature) without a `date:` count as this old
+DEFAULT_DATE = "2026-11-10"  # stories without a `date:` count as this old
 
 
 def parse_event(line, default_link=""):
@@ -145,7 +141,7 @@ def austin_today():
 def events_html(events):
     today = austin_today()
     rows = []
-    for iso, title, loc, text, img, alt, link in sorted(events):
+    for iso, title, loc, text, img, alt, link in sorted(events, key=lambda e: e[0]):  # same-day: file order
         d = date.fromisoformat(iso)
         if d < today:
             continue
@@ -192,11 +188,28 @@ def parse(path):
         elif mi := re.fullmatch(r'!\[(.*?)\]\((\S+?)(?:\s+"(.*?)")?\)', chunk.strip()):
             blocks.append(("img", mi.group(2), mi.group(1), mi.group(3) or ""))
         else:
-            blocks.append(("p", " ".join(lines)))
+            blocks.append(("p", "\n".join(lines)))
     meta["blocks"] = blocks
     meta["category"] = SHEET_TO_TAB.get(meta.get("category", ""), meta.get("category", ""))
     meta["card_lead_italic"] = meta.get("card_lead_italic", "true") == "true"
     return meta
+
+
+def para(text):
+    """Escape a paragraph; a line break inside it stays a line break."""
+    return "<br>\n".join(esc(line) for line in text.split("\n"))
+
+
+def flat(text):
+    return " ".join(text.split())
+
+
+def is_profile(s):
+    return s.get("layout") == "profile"
+
+
+def out_dir(s):
+    return s["slug"] if is_profile(s) else f"stories/{s['slug']}"
 
 
 def lede_and_intro(story):
@@ -210,14 +223,15 @@ def lede_and_intro(story):
     return pre[0], pre[1:]
 
 
-def card_excerpt(story, words=110):
+def card_excerpt(story):
+    words = int(story.get("card_words", 110))
     lede, intro = lede_and_intro(story)
-    out = [("em" if story["card_lead_italic"] else "p", lede)]
+    out = [("em" if story["card_lead_italic"] else "p", flat(lede))]
     n = len(lede.split())
     for p in intro:
         if n >= words:
             break
-        out.append(("p", p))
+        out.append(("p", flat(p)))
         n += len(p.split())
     return out
 
@@ -239,30 +253,18 @@ def head(title, desc, prefix):
 </head>"""
 
 
-def about(prefix):
-    # About copy from Ethan, 2026-11-10 (replaces the PSD's lorem ipsum).
-    paras = [
-        "Austin changes fast. Restaurants open and close, buildings change hands, and whole blocks look different "
-        "from one year to the next. Plenty of people cover what's new. Fewer stick around long enough to explain "
-        "what it means for the people who live here.",
-        "The Austin Local covers the center of the city: downtown, Clarksville, Bouldin Creek, Zilker and the "
-        "neighborhoods around them. We stay inside a small area on purpose, because you only notice how a "
-        "neighborhood is changing if you keep coming back to it. You see the same corners, the same institutions "
-        "and the same people over months and years.",
-        "Change is easy to talk about in big numbers, like new towers, rising rents and record crowds. We'd rather "
-        "look at it at street level. We cover the new places and the old ones that make room for them, and the people "
-        "who left but keep coming back. We also look at the plans being made now for blocks that will look different "
-        "in ten years.",
-    ]
-    copy = "".join(f"<p>{esc(x)}</p>" for x in paras)
+def footer(prefix):
+    # The PSDs' footer copy (2026-11-20): Harley's condensed version of Ethan's About copy of 2026-11-10.
+    copy = ("Austin changes fast, and plenty of people cover what’s new, but fewer stick around long enough to explain "
+            "what it means for the people who live here. This Side of Austin covers downtown, Clarksville, Bouldin "
+            "Creek, Zilker and the neighborhoods around them, and we stay in a small area on purpose, because you only "
+            "notice how a neighborhood is changing if you keep coming back to it. We skip the big numbers and look at "
+            "street level: the new places, the old ones that make room for them, and the plans for blocks that will "
+            "look different in ten years.")
     return f"""
-<footer class="about" id="about">
-  <p class="label label--line">About</p>
-  <div class="about-band">
-    <a class="about-logo" href="{prefix}index.html" aria-label="The Austin Local, home"><img src="{prefix}img/logo-gray.svg" alt="The Austin Local" width="345" height="117"></a>
-    <div class="about-text reveal">{copy}</div>
-    <div class="about-img"><img src="{prefix}img/about-mural.jpg" alt="Sunlight across a painted mural on a brick wall" loading="lazy" width="1298" height="1310"></div>
-  </div>
+<footer class="site-foot" id="about">
+  <a class="foot-logo" href="{prefix}index.html" aria-label="{SITE}, home"><img src="{prefix}img/logo-white.svg" alt="{SITE}" width="255" height="87" loading="lazy"></a>
+  <p class="foot-text reveal">{esc(copy)}</p>
 </footer>"""
 
 
@@ -271,7 +273,7 @@ def page(title, desc, prefix, body_class, body):
 <body class="{body_class}{' has-stevie' if ADOBE_KIT else ''}">
 <div class="page">
 {body}
-{about(prefix)}
+{footer(prefix)}
 </div>
 <script src="{prefix}js/site.js" defer></script>
 </body>
@@ -284,7 +286,7 @@ def render_blocks(blocks, prefix):
     out = []
     for b in blocks:
         if b[0] == "p":
-            out.append(f"<p>{esc(b[1])}</p>")
+            out.append(f"<p>{para(b[1])}</p>")
         elif b[0] == "ul":
             out.append("<ul>" + "".join(f"<li>{esc(i)}</li>" for i in b[1]) + "</ul>")
         elif b[0] == "img":
@@ -294,7 +296,8 @@ def render_blocks(blocks, prefix):
 
 
 def section_html(title, blocks, prefix, cls="sec"):
-    return f'<section class="{cls} reveal"><h2>{esc(title)}</h2>\n{render_blocks(blocks, prefix)}\n</section>'
+    h = f"<h2>{esc(title)}</h2>\n" if title else ""
+    return f'<section class="{cls} reveal">{h}{render_blocks(blocks, prefix)}\n</section>'
 
 
 def figure(src, alt, credit, prefix, cls):
@@ -313,10 +316,12 @@ def story_body(s, prefix):
     cur = None
     for b in blocks[i:]:
         if b[0] == "dir":
+            cur = None
             if b[1] == "wide":
-                cur = None
                 a = b[2] + ["", ""]
                 items.append(("wide", a[0], a[1], a[2]))
+            elif b[1] == "text":
+                pending = None
             else:
                 pending = b
             continue
@@ -325,6 +330,10 @@ def story_body(s, prefix):
             pending = None
             items.append(("sec", cur))
             continue
+        if cur is None:  # paragraphs right after a directive: an untitled section
+            cur = {"title": "", "blocks": [], "dir": pending}
+            pending = None
+            items.append(("sec", cur))
         cur["blocks"].append(b)
 
     parts = []
@@ -361,22 +370,24 @@ def story_body(s, prefix):
     hero_src = s.get("hero") or s["photo"]
     hero_credit = "" if s.get("hero") else s.get("photo_credit", "")
     hero_alt = s.get("hero_alt", "")
-    intro_html = "\n".join(f"<p>{esc(p)}</p>" for p in intro)
+    intro_html = "\n".join(f"<p>{para(p)}</p>" for p in intro)
+    byline = f'\n  <p class="byline">By {esc(s["byline"])}</p>' if s.get("byline") else ""
+    profile = is_profile(s)
+    back = "" if profile else f'\n  <p class="col back"><a href="{prefix}index.html#categories">← More from {SITE}</a></p>'
     return f"""
 <header class="story-head">
-  <a class="story-logo" href="{prefix}index.html" aria-label="The Austin Local, home"><img src="{prefix}img/logo-gray.svg" alt="The Austin Local" width="273" height="92"></a>
+  <a class="story-logo" href="{prefix}index.html" aria-label="{SITE}, home"><img src="{prefix}img/logo-gray.svg" alt="{SITE}" width="224" height="76"></a>
   <p class="label">{esc(s['category'])}</p>
-  <h1>{esc(s['title'])}</h1>
-  <p class="byline">By {esc(s['byline'])}</p>
+  <h1>{esc(s['title'])}</h1>{byline}
 </header>
 <main class="story">
   <figure class="story-hero"><img src="{prefix}img/{hero_src}" alt="{attr(hero_alt)}" width="1643" height="831" fetchpriority="high">{f'<figcaption>Photo: {esc(hero_credit)}</figcaption>' if hero_credit else ''}</figure>
-  <div class="col"><p class="lede reveal">{esc(lede)}</p></div>
+  <div class="col"><p class="lede{' lede--dek' if profile else ''} reveal">{para(lede)}</p></div>
+  <hr class="col rule">
   <div class="col intro reveal">
 {intro_html}
   </div>
-{chr(10).join(parts)}
-  <p class="col back"><a href="{prefix}index.html#categories">← More from The Austin Local</a></p>
+{chr(10).join(parts)}{back}
 </main>"""
 
 
@@ -401,18 +412,14 @@ def tab_panel(label, card, idx, open_):
 
 
 def tab_owners(stories):
-    """{tab: story slug or house card slug or None}, plus the stories that own no tab (newest first)."""
+    """{tab: story slug or None}, plus the stories that own no tab (newest first)."""
     owners = {}
     for tab in CATEGORIES:
         cands = [s for s in stories if s["category"] == tab and s.get("feature") != "false"]
         key = lambda s: (s.get("date") or DEFAULT_DATE, s["_file"])
         pinned = [s for s in cands if s.get("feature") == "true"]
         best = max(pinned or cands, key=key, default=None)
-        house = HOUSE_CARDS.get(tab)
-        if house and (best is None or (not pinned and key(best)[0] <= ESCUELA_CARD["date"])):
-            owners[tab] = house
-        else:
-            owners[tab] = best["slug"] if best else None
+        owners[tab] = best["slug"] if best else None
     taken = set(owners.values())
     rest = sorted((s for s in stories if s["slug"] not in taken),
                   key=lambda s: (s.get("date") or DEFAULT_DATE, s["_file"]), reverse=True)
@@ -428,7 +435,7 @@ def more_stories_html(rest):
         lede, _ = lede_and_intro(s)
         rows.append(
             f'    <li class="event reveal"><img src="img/{s["card_image"]}" alt="{attr(s.get("hero_alt", ""))}" loading="lazy" width="1016" height="606">'
-            f'<div class="event-text"><h3>{esc(s["card_title"])}</h3><p class="label">{esc(s["category"])} · {esc(s["kicker"])}</p><p>{esc(lede)}</p></div>'
+            f'<div class="event-text"><h3>{esc(s["card_title"])}</h3><p class="label">{esc(s["category"])} · {esc(s["kicker"])}</p><p>{esc(flat(lede))}</p></div>'
             f'<a class="event-link" href="stories/{s["slug"]}/" aria-label="Read the story: {attr(s["card_title"])}"><img src="img/arrow.svg" alt="" width="40" height="40"></a></li>')
     return ('\n\n<section class="events more-stories" id="more-stories" aria-labelledby="more-h">\n'
             '  <h2 class="label events-h" id="more-h">More Stories</h2>\n  <ol class="event-list">\n'
@@ -436,11 +443,12 @@ def more_stories_html(rest):
 
 
 def home(stories, events):
-    cards = {"escuela": ESCUELA_CARD}
+    cards = {}
     for s in stories:
         cards[s["slug"]] = {
             "kicker": s["kicker"], "card_title": s["card_title"], "card_image": s["card_image"],
-            "card_alt": s.get("hero_alt", ""), "href": f"stories/{s['slug']}/", "excerpt": card_excerpt(s),
+            "card_alt": s.get("card_alt") or s.get("hero_alt", ""), "href": f"stories/{s['slug']}/",
+            "excerpt": card_excerpt(s),
         }
     owners, rest = tab_owners(stories)
     tabs = "\n".join(tab_panel(label, cards.get(owners[label]) if owners[label] else None, i, label == DEFAULT_OPEN)
@@ -452,13 +460,14 @@ def home(stories, events):
 
 
 # ---------------------------------------------------------------- validation
-REQUIRED = ["slug", "category", "kicker", "title", "card_title", "byline", "card_image", "hero_alt"]
-DIRECTIVES = {"pair", "band", "wide"}
+REQUIRED = ["slug", "category", "kicker", "title", "card_title", "card_image", "hero_alt"]
+REQUIRED_PROFILE = ["slug", "title", "hero", "hero_alt"]
+DIRECTIVES = {"pair", "band", "wide", "text"}
 
 
 def check():
-    """Return (stories, events, errors). Nothing is written."""
-    errors, stories, seen = [], [], {}
+    """Return (stories, profiles, events, errors). Nothing is written."""
+    errors, stories, profiles, seen = [], [], [], {}
     img = ROOT / "img"
 
     def need_img(where, name):
@@ -475,7 +484,8 @@ def check():
             errors.append(f"{f}: {e}")
             continue
         n = len(errors)
-        for k in REQUIRED:
+        profile = is_profile(s)
+        for k in (REQUIRED_PROFILE if profile else REQUIRED):
             if not s.get(k):
                 errors.append(f"{f}: missing `{k}:`")
         if not (s.get("photo") or s.get("hero")):
@@ -485,10 +495,12 @@ def check():
             errors.append(f"{f}: slug `{slug}` must be lowercase letters, digits and hyphens")
         if slug and slug != path.stem:
             errors.append(f"{f}: slug `{slug}` must match the file name ({path.stem})")
-        if slug in seen or slug == "escuela":
-            errors.append(f"{f}: slug `{slug}` is already used by {seen.get(slug, 'the Escuela feature')}")
+        if slug in seen or slug in ("stories", "css", "js", "img", "content", "templates"):
+            errors.append(f"{f}: slug `{slug}` is already used by {seen.get(slug, 'a site folder')}")
         seen[slug] = f
-        if s.get("category") and s["category"] not in CATEGORIES:
+        if profile and s.get("events"):
+            errors.append(f"{f}: a profile page can't carry events (put them in content/events.txt)")
+        if not profile and s.get("category") and s["category"] not in CATEGORIES:
             errors.append(f"{f}: category `{s['category']}` isn't a tab ({', '.join(CATEGORIES)}) or a sheet name ({', '.join(SHEET_TO_TAB)})")
         if s.get("date"):
             try:
@@ -506,7 +518,7 @@ def check():
                 need_img(f"{f} inline image", b[1])
             elif b[0] == "dir":
                 if b[1] not in DIRECTIVES:
-                    errors.append(f"{f}: unknown directive ::{b[1]} (use ::pair, ::band or ::wide)")
+                    errors.append(f"{f}: unknown directive ::{b[1]} (use ::pair, ::band, ::wide or ::text)")
                 elif b[1] == "wide" and not b[2]:
                     errors.append(f"{f}: ::wide needs `img | alt [| credit]`")
                 elif b[1] in ("band", "wide") and b[2]:
@@ -523,9 +535,9 @@ def check():
                 story_body(s, "../../")
             except Exception as e:  # noqa: BLE001
                 errors.append(f"{f}: body doesn't render ({type(e).__name__}: {e}). It needs an opening paragraph "
-                              "(or `dek:`), and every ::pair/::band must sit right before a ## heading")
+                              "(or `dek:`)")
                 continue
-            stories.append(s)
+            (profiles if profile else stories).append(s)
     events = []
     if EVENTS_FILE.exists():
         for n, line in enumerate(EVENTS_FILE.read_text().splitlines(), 1):
@@ -541,11 +553,11 @@ def check():
             home(stories, events)
         except Exception as e:  # noqa: BLE001
             errors.append(f"homepage doesn't render: {type(e).__name__}: {e}")
-    return stories, events, errors
+    return stories, profiles, events, errors
 
 
 def main():
-    stories, events, errors = check()
+    stories, profiles, events, errors = check()
     if errors:
         print(f"build.py: {len(errors)} problem(s); nothing was written:", file=sys.stderr)
         for e in errors:
@@ -553,17 +565,19 @@ def main():
         sys.exit(1)
     if "--check" in sys.argv[1:]:
         owners, rest = tab_owners(stories)
-        print(f"ok: {len(stories)} stories, {len(events)} events")
+        print(f"ok: {len(stories)} stories, {len(profiles)} profile pages, {len(events)} events")
         for tab in CATEGORIES:
             print(f"  tab {tab!r}: {owners[tab] or '(coming soon)'}")
         if rest:
             print("  more stories:", ", ".join(s["slug"] for s in rest))
         return
-    for s in stories:
-        out = ROOT / "stories" / s["slug"] / "index.html"
+    for s in stories + profiles:
+        out = ROOT / out_dir(s) / "index.html"
         out.parent.mkdir(parents=True, exist_ok=True)
+        prefix = "../" * len(Path(out_dir(s)).parts)
         lede, _ = lede_and_intro(s)
-        out.write_text(page(f"{s['title']} | The Austin Local", lede, "../../", "is-story", story_body(s, "../../")))
+        cls = "is-story is-profile" if is_profile(s) else "is-story"
+        out.write_text(page(f"{s['title']} | {SITE}", flat(lede), prefix, cls, story_body(s, prefix)))
         print("wrote", out.relative_to(ROOT))
     # a story whose .md was deleted loses its page (only folders holding nothing but a generated index.html)
     slugs = {s["slug"] for s in stories}
@@ -572,8 +586,8 @@ def main():
             shutil.rmtree(d)
             print("removed", d.relative_to(ROOT))
     (ROOT / "index.html").write_text(page(
-        "The Austin Local",
-        "Stories, food, culture and events from around Austin.",
+        SITE,
+        "Stories, food, culture and events from the center of Austin.",
         "", "is-home", home(stories, events)))
     print("wrote index.html")
 
