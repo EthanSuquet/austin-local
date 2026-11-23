@@ -151,8 +151,8 @@ or a body that won't render. A failed check fails the Action, and the live site 
   content is added by JS; reduced motion gets a plain page.
 
 ## Open (2026-11-23)
-- **Typos in the PSD text, kept verbatim:** "Meanwhile-braned" (homepage feature) and "here in Austin Local"
-  (Wendi + Seven, the old name). Ethan to decide whether to correct them.
+- (Done 2026-11-23, Ethan's OK) Two PSD typos corrected: "Meanwhile-braned" → "Meanwhile-branded" (homepage
+  feature) and "here in Austin Local" → "here in This Side of Austin" (Wendi + Seven). Otherwise the text is verbatim.
 - The Wendi + Seven dek is Stevie **Book Italic** in the PSD; the Adobe web project only has Light Italic, so it
   renders in Light Italic. Adding Book Italic to project `rqk0gvx` fixes it.
 - The homepage hero dog ("Golden Retriever in a Cozy Christmas Sweater") looks like stock or AI imagery; source
