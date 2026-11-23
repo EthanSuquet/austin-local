@@ -90,7 +90,7 @@ date: 2026-11-16
 # optional: true pins it to its tab, false keeps it off the tabs ("More Stories" only)
 feature: true
 source: TODO-9-kite-fest-article.docx
-# repeatable; date | title | location | text | image | alt [| link, default this story]
+# repeatable; date | title | location | text | image | alt [| link, default this story [| photo credit]]
 event: 2027-03-07 | Zilker Kite Festival | Zilker Park, 2100 Barton Springs Road | Free, 10 a.m. to 5 p.m. | zilker-kite-fest-1.jpg | Kites over Zilker Park
 ---
 
@@ -161,11 +161,13 @@ or a body that won't render. A failed check fails the Action, and the live site 
 ## Open (2026-11-10)
 - **Culture + Community** (= the sheet's Health & Wellness) has no story yet ("Stories coming soon"); the 11/2 sheet confirmed none.
 - **Calendar of events:** dated, upcoming events from the articles, as `event:` lines in each story's front matter
-  (standalone events: `content/events.txt`; same `date | title | location | text | image | alt [| link]` format; the
+  (standalone events: `content/events.txt`; same `date | title | location | text | image | alt [| link [| credit]]` format; the
   weekday is derived). **Past events drop off automatically** (Ethan, 2026-11-10): the build skips any event dated before
   today in Austin time, and `js/site.js` removes them in the browser the morning after, so the live page stays
   right without a rebuild. With none left it shows "More events coming soon." Test with `?today=YYYY-MM-DD`.
   Sweet Home's Sunday worship was taken off (it'd be past by launch). Same-day events show in file order.
+  The pet-photo events use Wikimedia Commons photos, credited under each image (Ethan, 2026-11-23: the family-with-Santa
+  shots repeated the feature). Sources are listed in `content/events.txt`.
 - Image rights to confirm before this leaves demo (still open 2026-11-23): the Hotel Trinity bar, room and seafood images look
   AI-generated ("Illuminated Octopus Bar Lounge.png" etc.) but show as the real hotel. The Sweet Home tab
   photo is `Sweethome-Missionary-04-Bud-Franck.jpg` (likely Austin Chronicle). The Escuela photos have no credit.

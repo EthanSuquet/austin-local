@@ -215,7 +215,10 @@ button { font: inherit; color: inherit; }
 .event-date { grid-column: 1; text-align: center; padding-top: 2px; }
 .event-date span { display: block; font-size: 20px; line-height: 20px; text-transform: uppercase; }
 .event-date b { display: block; margin-top: 15px; font-weight: var(--med); font-size: 54px; line-height: 44px; }
-.event > img { grid-column: 3; width: 100%; height: auto; aspect-ratio: 508 / 303; object-fit: cover; }
+.event > img, .event-img { grid-column: 3; }
+.event > img, .event-img img { width: 100%; height: auto; aspect-ratio: 508 / 303; object-fit: cover; }
+.event-img { position: relative; }
+.event-img figcaption { position: absolute; top: 100%; left: 0; right: 0; text-align: left; }   /* sits in the 77px row gap, so credits don't move the PSD rows */
 .event-text { grid-column: 5; }
 .event-text h3 { font-weight: var(--reg); font-size: 24px; line-height: 24px; }
 .event-text .label { margin-top: 19px; font-weight: var(--light); }
@@ -376,7 +379,8 @@ figcaption { margin-top: 8px; font-size: 12px; line-height: 16px; color: var(--s
   .event { grid-template-columns: 64px 1fr 40px; column-gap: 16px; row-gap: 16px; }
   .event + .event { margin-top: 56px; }
   .event-date { grid-column: 1; grid-row: 1; }
-  .event > img { grid-column: 2 / 4; grid-row: 1; }
+  .event > img, .event-img { grid-column: 2 / 4; grid-row: 1; }
+  .event-img figcaption { position: static; }
   .event-text { grid-column: 1 / 3; grid-row: 2; }
   .event-link { grid-column: 3; grid-row: 2; }
   .event-date span { font-size: 18px; }

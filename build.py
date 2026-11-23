@@ -41,8 +41,9 @@ Front matter (one `key: value` per line):
     feature       optional: true = pin this story to its tab; false = never take the tab (archive only)
     source        optional: the Word file it came from
     event         optional, repeatable; one calendar event per line:
-                  event: YYYY-MM-DD | title | location | text | image | alt [| link]
-                  (link defaults to this story's page)
+                  event: YYYY-MM-DD | title | location | text | image | alt [| link [| credit]]
+                  (link defaults to this story's page; leave it empty to keep the default and still give a
+                  credit; credit shows under the photo as "Photo: ...")
 
 Homepage tabs: each tab shows its pinned story (feature: true), else the newest story (by `date`, then file
 name) in that category. Stories bumped off a tab stay built and are listed under "More stories".
@@ -100,7 +101,7 @@ def attr(s):
 
 # Calendar of events: dated, upcoming things the articles themselves state. They live with their story, as
 # `event:` lines in its front matter, or (for events with no story) in content/events.txt, one per line:
-#     YYYY-MM-DD | title | location | text | image | alt [| link]
+#     YYYY-MM-DD | title | location | text | image | alt [| link [| credit]]
 # Each event drops off the calendar once its date has passed in Austin (America/Chicago) time, twice over:
 #   - here, at build time (a past event isn't written into index.html at all), and
 #   - in js/site.js, in the visitor's browser, from each row's data-date, so it disappears the next morning
@@ -111,15 +112,15 @@ DEFAULT_DATE = "2026-11-10"  # stories without a `date:` count as this old
 
 
 def parse_event(line, default_link=""):
-    """'date | title | location | text | image | alt [| link]' -> tuple, or raise ValueError."""
+    """'date | title | location | text | image | alt [| link [| credit]]' -> tuple, or raise ValueError."""
     f = [x.strip() for x in line.split("|")]
-    if len(f) not in (6, 7):
-        raise ValueError(f"needs 6 or 7 |-separated fields (date | title | location | text | image | alt [| link]), got {len(f)}")
+    if len(f) not in (6, 7, 8):
+        raise ValueError(f"needs 6 to 8 |-separated fields (date | title | location | text | image | alt [| link [| credit]]), got {len(f)}")
     date.fromisoformat(f[0])
     if not all(f[:6]):
         raise ValueError("date, title, location, text, image and alt can't be empty")
-    link = f[6] if len(f) == 7 and f[6] else default_link
-    return (f[0], f[1], f[2], f[3], f[4], f[5], link)
+    f += [""] * (8 - len(f))
+    return (f[0], f[1], f[2], f[3], f[4], f[5], f[6] or default_link, f[7])
 
 
 def load_events(stories):
@@ -141,13 +142,14 @@ def austin_today():
 def events_html(events):
     today = austin_today()
     rows = []
-    for iso, title, loc, text, img, alt, link in sorted(events, key=lambda e: e[0]):  # same-day: file order
+    for iso, title, loc, text, img, alt, link, credit in sorted(events, key=lambda e: e[0]):  # same-day: file order
         d = date.fromisoformat(iso)
         if d < today:
             continue
         rows.append(
             f'    <li class="event reveal" data-date="{iso}"><p class="event-date"><span>{d:%a}</span><b>{d.day}</b></p>'
-            f'<img src="img/{img}" alt="{attr(alt)}" loading="lazy" width="1016" height="606">'
+            f'<figure class="event-img"><img src="img/{img}" alt="{attr(alt)}" loading="lazy" width="1016" height="606">'
+            + (f'<figcaption>Photo: {esc(credit)}</figcaption>' if credit else '') + '</figure>'
             f'<div class="event-text"><h3>{esc(title)}</h3><p class="label">{esc(loc)}</p><p>{esc(text)}</p></div>'
             + (f'<a class="event-link" href="{attr(link)}" aria-label="Read the story: {attr(title)}"><img src="img/arrow.svg" alt="" width="40" height="40"></a>' if link else '')
             + '</li>')
